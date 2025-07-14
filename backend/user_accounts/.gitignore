@@ -1,0 +1,56 @@
+# Django 项目基本忽略规则
+*.pyc
+__pycache__/
+db.sqlite3
+db.sqlite3-journal
+db.sqlite3-wal
+*.log
+*.pot
+*.po
+*.mo
+
+# 静态文件和媒体文件（根据需要保留或忽略）
+/static/
+/media/
+
+# Django 项目生成的临时文件
+*.tmp
+*.swp
+
+# Django 项目配置文件（如本地开发环境配置）
+.settings_local.py
+.env
+
+# Python 虚拟环境
+venv/
+*.egg-info/
+*.egg
+*.whl
+*.dist-info/
+
+# VSCode 相关忽略规则
+.vscode/
+*.code-workspace
+
+# 编译生成的文件
+*.o
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.dll
+*.dylib
+*.bin
+*.obj
+*.class
+*.cache
+
+# 测试文件
+*.test
+*.tests
+*.test.py
+*.tests.py
+
+# 日志文件
+*.log
+*.log.*
