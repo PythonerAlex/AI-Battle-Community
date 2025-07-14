@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'battle',
     'evaluation',
     'friends',  # 添加 friends 应用
+    'problemhub',
 ]
 
 

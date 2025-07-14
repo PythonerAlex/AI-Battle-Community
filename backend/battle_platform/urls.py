@@ -24,4 +24,8 @@ urlpatterns = [
     path('api/', include('user_accounts.urls')),  # ✅ 加这行
     path('api/friends/', include('friends.urls')),  # ✅ 加入这行
     path("api/run_evaluation/", include("evaluation.urls")),
+    # main_project/urls.py
+
+    path('api/problemhub/', include('problemhub.urls')),
+
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

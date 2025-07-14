@@ -2,29 +2,43 @@ import React, { useState } from 'react';
 import { Typography, Tabs, Card, Button, Tag, Space, Collapse, Input, List, message } from 'antd';
 import { ArrowLeftOutlined, LikeOutlined } from '@ant-design/icons';
 import { useNavigate, useParams } from 'react-router-dom';
-
+import { useEffect } from 'react'; // ⬅️ 新增
+import { API_BASE_URL } from '../config/wsConfig';
 const { Title, Paragraph } = Typography;
 const { TabPane } = Tabs;
 const { Panel } = Collapse;
 
-const mockProposal = {
-  id: 1,
-  title: 'How can we predict forest fires more effectively?',
-  description: 'Canadian forests suffer from uncontrollable wildfires. Can AI help forecast and prevent them?',
-  tags: ['Environment', 'Climate'],
-  votes: 12,
-  evaluationSuggestions: [
-    { id: 1, content: 'Test model accuracy on historical wildfire data', likes: 4 },
-    { id: 2, content: 'Include robustness to missing satellite data', likes: 2 },
-  ],
-};
+
 
 function ProposalDetailPage() {
   const navigate = useNavigate();
   const { id } = useParams(); // placeholder, not yet used
   const [likedIds, setLikedIds] = useState(new Set());
-  const [suggestions, setSuggestions] = useState(mockProposal.evaluationSuggestions);
+
   const [inputValue, setInputValue] = useState('');
+
+  const [proposal, setProposal] = useState(null);
+  //const [suggestions, setSuggestions] = useState(proposal.evaluationSuggestions);
+  const [suggestions, setSuggestions] = useState([]);
+  useEffect(() => {
+    const fetchProposal = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/problemhub/proposal/${id}/`);
+        const data = await res.json();
+        setProposal(data);
+        // 兼容将来扩展
+        if (Array.isArray(data.evaluationSuggestions)) {
+          setSuggestions(data.evaluationSuggestions);
+        } else {
+          setSuggestions([]);  // 目前默认无内容
+        }
+      } catch (error) {
+        console.error('Failed to fetch proposal:', error);
+      }
+    };
+    fetchProposal();
+  }, [id]);
+
 
   const handleLike = (sid) => {
     if (likedIds.has(sid)) return;
@@ -46,7 +60,7 @@ function ProposalDetailPage() {
     setInputValue('');
     message.success('Your suggestion was submitted.');
   };
-
+  if (!proposal) return <div style={{ padding: 24 }}>Loading...</div>;
   return (
     <div style={{ padding: 24 }}>
       <Button type="link" icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)}>
@@ -54,10 +68,10 @@ function ProposalDetailPage() {
       </Button>
 
       <Card style={{ marginTop: 16 }} bordered={false}>
-        <Title level={3}>{mockProposal.title}</Title>
-        <Paragraph>{mockProposal.description}</Paragraph>
+        <Title level={3}>{proposal.title}</Title>
+        <Paragraph>{proposal.description}</Paragraph>
         <Space wrap style={{ marginBottom: 12 }}>
-          {mockProposal.tags.map((tag) => (
+          {proposal.tags.map((tag) => (
             <Tag key={tag}>{tag}</Tag>
           ))}
         </Space>
@@ -65,11 +79,11 @@ function ProposalDetailPage() {
         <Tabs defaultActiveKey="summary">
           <TabPane tab="Summary" key="summary">
             <Paragraph>
-              This problem has received <b>{mockProposal.votes}</b> votes.
+              This problem has received <b>{proposal.votes}</b> votes.
             </Paragraph>
           </TabPane>
 
-          <TabPane tab="Criteria" key="criteria">
+          {/*<TabPane tab="Criteria" key="criteria">
             <Collapse defaultActiveKey={['1']}>
               <Panel header="Community-Suggested Evaluation Criteria" key="1">
                 <List
@@ -109,8 +123,14 @@ function ProposalDetailPage() {
             >
               Submit Criterion
             </Button>
+          </TabPane>*/}
+          <TabPane tab="Criteria" key="criteria">
+            <Collapse defaultActiveKey={['1']}>
+              <Panel header="Community-Suggested Evaluation Criteria" key="1">
+                <Paragraph>This feature will be added later.</Paragraph>
+              </Panel>
+            </Collapse>
           </TabPane>
-
           <TabPane tab="Comments" key="comments">
             <Paragraph>This feature will be added later.</Paragraph>
           </TabPane>
