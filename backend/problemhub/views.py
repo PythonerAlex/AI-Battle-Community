@@ -6,6 +6,7 @@ from rest_framework import status, permissions
 from django.utils import timezone
 from .models import Cycle, Problem, Vote
 from .serializers import CycleSerializer, ProblemSerializer, VoteSerializer
+from .models import EvaluationCriterion, CriterionLike
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Count
 
@@ -163,3 +164,57 @@ class CriterionLikeView(APIView):
 
         CriterionLike.objects.create(user=request.user, criterion=criterion)
         return Response({'detail': 'Liked successfully'}, status=status.HTTP_201_CREATED)
+
+class CriterionUnlikeView(APIView):
+    def post(self, request, criterion_id):
+        try:
+            criterion = EvaluationCriterion.objects.get(id=criterion_id)
+        except EvaluationCriterion.DoesNotExist:
+            return Response({"detail": "Criterion not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        CriterionLike.objects.filter(user=request.user, criterion=criterion).delete()
+        return Response({"detail": "Unliked successfully."}, status=status.HTTP_200_OK)
+
+
+
+class CriterionDeleteView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, pk):
+        try:
+            criterion = EvaluationCriterion.objects.get(pk=pk)
+        except EvaluationCriterion.DoesNotExist:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        if criterion.author != request.user:
+            return Response({"detail": "Permission denied."}, status=status.HTTP_403_FORBIDDEN)
+
+        criterion.delete()
+        return Response({"detail": "Deleted."}, status=status.HTTP_204_NO_CONTENT)
+    
+class CriterionUpdateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request, pk):
+        try:
+            criterion = EvaluationCriterion.objects.get(pk=pk)
+        except EvaluationCriterion.DoesNotExist:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        if criterion.author != request.user:
+            return Response({"detail": "Permission denied."}, status=status.HTTP_403_FORBIDDEN)
+
+        content = request.data.get('content', '').strip()
+        if not content:
+            return Response({"detail": "Content cannot be empty."}, status=status.HTTP_400_BAD_REQUEST)
+
+        criterion.content = content
+        criterion.save()
+        return Response({
+            "id": criterion.id,
+            "content": criterion.content,
+            "likes_count": criterion.likes.count(),
+            "liked_by_me": True,  # or recalculate if needed
+            "author_username": criterion.author.username,
+            "problem": criterion.problem.id,
+        }, status=status.HTTP_200_OK)

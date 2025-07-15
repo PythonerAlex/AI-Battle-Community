@@ -12,6 +12,9 @@ from .views import (
     ProposalDetailView,
     EvaluationCriterionListCreateView, 
     CriterionLikeView,
+    CriterionUnlikeView,
+    CriterionDeleteView,
+    CriterionUpdateView,
 )
 
 urlpatterns = [
@@ -25,6 +28,10 @@ urlpatterns = [
     path('proposal/<int:problem_id>/', ProposalDetailView.as_view()),
     path('proposal/<int:problem_id>/criteria/', EvaluationCriterionListCreateView.as_view(), name='proposal-criteria'),
     path('criteria/<int:criterion_id>/like/', CriterionLikeView.as_view(), name='criterion-like'),
-    
+    path('criteria/<int:criterion_id>/unlike/', CriterionUnlikeView.as_view(), name='criterion-unlike'),
+    path('criteria/<int:pk>/delete/', CriterionDeleteView.as_view(), name='delete-criterion'),
+
+    path('criteria/<int:pk>/update/', CriterionUpdateView.as_view(), name='update-criterion'),
+
 
 ]

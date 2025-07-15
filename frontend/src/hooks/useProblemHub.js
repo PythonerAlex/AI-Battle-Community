@@ -212,6 +212,41 @@ async function fetchProposal(problemId) {
   }
 }
 
+async function unlikeEvaluationCriterion(criterionId) {
+  const res = await fetch(`${API_BASE_URL}/api/problemhub/criteria/${criterionId}/unlike/`, {
+    method: 'POST',
+    headers,
+  });
+
+  if (!res.ok) throw new Error('Failed to unlike criterion');
+}
+
+async function deleteEvaluationCriterion(criterionId) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/problemhub/criteria/${criterionId}/delete/`, {
+      method: 'DELETE',
+      headers,
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.detail || 'Failed to delete criterion');
+    }
+  } catch (error) {
+    throw error;
+  }
+}
+
+async function updateEvaluationCriterion(id, newContent) {
+  const res = await fetch(`${API_BASE_URL}/api/problemhub/criteria/${id}/update/`, {
+    method: 'PUT',
+    headers,
+    body: JSON.stringify({ content: newContent }),
+  });
+  if (!res.ok) throw new Error('Failed to update criterion');
+  return await res.json();
+}
+
 
   return {
     cycles,
@@ -231,10 +266,13 @@ async function fetchProposal(problemId) {
     deleteProposal,
     addEvaluationCriterion,
     likeEvaluationCriterion,
-    
+    unlikeEvaluationCriterion,
+    deleteEvaluationCriterion,
+    updateEvaluationCriterion,
     setProblems, // ✅ 新增暴露，便于 ProblemHub.js 中直接更新 UI
 
   };
 };
 
 export default useProblemHub;
+
