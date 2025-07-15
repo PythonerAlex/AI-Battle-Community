@@ -54,7 +54,8 @@ function FriendsSidebar() {
 
       if (res.ok) {
         fetchPendingRequests();
-        alert("The add has been sent out and you just wait for the response");
+        //alert("The add has been sent out and you just wait for the response");
+        message.info("The add has been sent out and you just wait for the response")
       } else {
         console.error(data.error || 'Failed to send request');
       }

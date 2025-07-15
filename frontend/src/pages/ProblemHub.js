@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Tabs, List, Card, Tag, Space, Typography, Alert, Input, CheckableTag, Switch, message } from 'antd';
+import { Button, Tabs, Card, Tag, Space, Typography, Alert, Input, Switch, message } from 'antd';
 import { LikeOutlined } from '@ant-design/icons';
 import NewProblemModal from '../components/NewProblemModal';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import useProblemHub from '../hooks/useProblemHub';
 import ProblemList from '../components/ProblemList';
+import CycleSummary from '../components/CycleSummary';  
+import CurrentCyclePanel from '../components/CurrentCyclePanel';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 dayjs.extend(duration);
-  
+
 const { Title, Paragraph } = Typography;
 const { TabPane } = Tabs;
 
@@ -178,204 +180,52 @@ const handleDelete = async (id) => {
     });
   }
 
-  if (currentCycle) {
-    return (
-      <div style={{ padding: '24px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-          <Title level={3}>Problem Hub</Title>
-          <Button
-            type="primary"
-            disabled={!currentUser}
-            onClick={() => setModalVisible(true)}
-          >
-            New Problem
-          </Button>
-        </div>
-
-        <Card style={{ backgroundColor: '#f0f5ff', border: '1px solid #adc6ff', marginBottom: 24 }} bodyStyle={{ padding: 16 }}>
-          <Title level={4} style={{ margin: 0, color: '#1d39c4' }}>🔁 {currentCycle.title}</Title>
-          <Paragraph style={{ fontSize: '18px', fontWeight: 500, color: '#391085', marginTop: 4 }}>
-            ⏳ Ending in <span style={{ fontWeight: 'bold' }}>{timeLeft}</span>
-          </Paragraph>
-        </Card>
-
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
-          <Space>
-            <Title level={4} style={{ margin: 0 }}>Proposals</Title>
-            <label>
-              <input
-                type="checkbox"
-                checked={showOnlyMine}
-                onChange={(e) => setShowOnlyMine(e.target.checked)}
-                style={{ marginRight: 6 }}
-              />
-              Only show mine
-            </label>
-          </Space>
-
-          <Input.Search
-            placeholder="Search proposals..."
-            allowClear
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={{ width: 280 }}
-          />
-        </div>
-
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          {/* ✅ 自定义可选标签组 */}
-          <Space wrap>
-            {allTags.map((tag) => {
-              const isChecked = selectedTags.includes(tag);
-              return (
-                <Tag
-                  key={tag}
-                  style={{
-                    cursor: 'pointer',
-                    userSelect: 'none',
-                    border: isChecked ? '2px solid #1890ff' : '1px solid #d9d9d9',
-                    backgroundColor: isChecked ? '#e6f7ff' : '#fafafa',
-                    color: isChecked ? '#1890ff' : 'inherit',
-                  }}
-                  onClick={() => {
-                    const nextTags = isChecked
-                      ? selectedTags.filter(t => t !== tag)
-                      : [...selectedTags, tag];
-                    setSelectedTags(nextTags);
-                  }}
-                >
-                  {tag}
-                </Tag>
-              );
-            })}
-          </Space>
-
-          {/* ✅ AND / OR 切换开关 */}
-          <Space>
-            <span style={{ fontSize: 14 }}>Tag Filter Mode:</span>
-            <Switch
-              checked={tagFilterMode === 'AND'}
-              onChange={(checked) => setTagFilterMode(checked ? 'AND' : 'OR')}
-              checkedChildren="AND"
-              unCheckedChildren="OR"
-            />
-          </Space>
-        </div>
-
-
-
-
-        <Tabs defaultActiveKey="all">
-          <TabPane tab="All" key="all">
-            <ProblemList
-              //problems={currentProblems}
-              problems={displayedProblems}
-              onVote={handleVote}
-              onUnvote={handleUnvote}
-              votedIds={votedIds}
-              currentUser={currentUser}
-              onDelete={handleDelete}
-            />
-          </TabPane>
-          <TabPane tab="Popular" key="popular">
-            <ProblemList
-              //problems={[...currentProblems].sort((a, b) => b.votes - a.votes)}
-              problems={[...displayedProblems].sort((a, b) => b.votes - a.votes)}
-              //problems={displayedProblems}
-              onVote={handleVote}
-              onUnvote={handleUnvote}
-              votedIds={votedIds}
-              currentUser={currentUser}
-              onDelete={handleDelete}
-            />
-          </TabPane>
-        </Tabs>
-
-        <NewProblemModal
-          visible={modalVisible}
-          onClose={() => setModalVisible(false)}
-          onSubmit={handleSubmit}
-        />
-
-        <Button type="dashed" onClick={() => setShowHistory(!showHistory)} style={{ marginTop: 24 }}>
-          {showHistory ? 'Hide Past Rounds' : 'View Past Rounds'}
-        </Button>
-        {showHistory &&
-          cycles.filter((c) => currentCycle && c.id !== currentCycle.id).map((cycle) => {
-            const cycleProblems = Array.isArray(problems)
-              ? problems.filter((p) => p.cycle?.id === cycle.id)
-              : [];
-
-            const winner = cycleProblems.length > 0
-              ? [...cycleProblems].sort((a, b) => b.votes - a.votes)[0]
-              : null;
-
-            return (
-              <div key={cycle.id} style={{ marginTop: 32 }}>
-                <Title level={4}>{cycle.title}</Title>
-                {winner ? (
-                  <Card
-                    title="🏆 Winning Proposal"
-                    style={{ border: '1px solid #d3adf7' }}
-                  >
-                    <Title level={5}>{winner.title}</Title>
-                    <Paragraph>{winner.description}</Paragraph>
-                    <Paragraph><Tag color="purple">Votes: {winner.votes}</Tag></Paragraph>
-                  </Card>
-                ) : (
-                  <Paragraph>No proposals submitted in this round.</Paragraph>
-                )}
-              </div>
-            );
-          })}
-      </div>
-    );
-  }
+ if (currentCycle )
+ return ( 
+  <CurrentCyclePanel
+    currentCycle={currentCycle}
+    timeLeft={timeLeft}
+    currentUser={currentUser}
+    modalVisible={modalVisible}
+    setModalVisible={setModalVisible}
+    showOnlyMine={showOnlyMine}
+    setShowOnlyMine={setShowOnlyMine}
+    searchTerm={searchTerm}
+    setSearchTerm={setSearchTerm}
+    selectedTags={selectedTags}
+    setSelectedTags={setSelectedTags}
+    tagFilterMode={tagFilterMode}
+    setTagFilterMode={setTagFilterMode}
+    allTags={allTags}
+    displayedProblems={displayedProblems}
+    handleVote={handleVote}
+    handleUnvote={handleUnvote}
+    votedIds={votedIds}
+    handleDelete={handleDelete}
+    handleSubmit={handleSubmit}
+    showHistory={showHistory}
+    setShowHistory={setShowHistory}
+    cycles={cycles}
+    problems={problems}
+  />
+) 
 
   if (justEndedCycle) {
-    const endedProblems = Array.isArray(problems)
-      ? problems.filter((p) => p.cycle === justEndedCycle.id)
-      : [];
-    const winner = endedProblems.length > 0 ? [...endedProblems].sort((a, b) => b.votes - a.votes)[0] : null;
-
-    return (
-      <div style={{ padding: 24 }}>
-        <Title level={3}>{justEndedCycle.title} has ended</Title>
-        {winner ? (
-          <Card title="🏆 Winning Proposal" style={{ marginBottom: 24, border: '2px solid #d3adf7' }}>
-            <Title level={5}>{winner.title}</Title>
-            <Paragraph>{winner.description}</Paragraph>
-            <Paragraph><Tag color="purple">Votes: {winner.votes}</Tag></Paragraph>
-            <Button
-              type="primary"
-              href={currentUser ? `/model-studio?proposalId=${winner.id}` : undefined}
-              disabled={!currentUser}
-            >
-              ➡ Proceed to Model Studio
-            </Button>
-            {!currentUser && <Paragraph type="secondary" style={{ marginTop: 8 }}>Please login to participate in model development.</Paragraph>}
-          </Card>
-        ) : (
-          <Paragraph>No proposals were submitted in this round.</Paragraph>
-        )}
-
-        {nextCycle && (
-          <Card style={{ background: '#e6f4ff', border: '1px solid #91d5ff' }}>
-            <Paragraph>
-              📢 Next round <b>{nextCycle.title}</b> will begin on <Tag color="blue">{dayjs(nextCycle.start_time).format('MMM D, YYYY')}</Tag>
-            </Paragraph>
-          </Card>
-        )}
-      </div>
-    );
-  }
-
+  return (
+    <CycleSummary
+      cycle={justEndedCycle}
+      problems={problems}
+      nextCycle={nextCycle}
+      currentUser={currentUser}
+    />
+  );
+}
   return (
     <div style={{ padding: 24 }}>
       <Title level={3}>Problem Hub</Title>
       <Alert
-        message="No active proposal round."
-        description="Please check back later for the next round of proposals."
+        message="Loading ..."
+        description="The page is coming soon..."
         type="info"
         showIcon
       />

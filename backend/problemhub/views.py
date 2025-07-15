@@ -112,7 +112,7 @@ class ProposalDetailView(APIView):
         except Problem.DoesNotExist:
             return Response({"detail": "Problem not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = ProblemSerializer(problem)
+        serializer = ProblemSerializer(problem, context={'request': request})
         return Response(serializer.data)
     
     def delete(self, request, problem_id):
@@ -127,3 +127,39 @@ class ProposalDetailView(APIView):
 
         problem.delete()
         return Response({"detail": "Proposal deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+    
+
+
+from .models import Problem, EvaluationCriterion, CriterionLike
+from .serializers import EvaluationCriterionSerializer
+from django.shortcuts import get_object_or_404
+
+class EvaluationCriterionListCreateView(APIView):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get(self, request, problem_id):
+        problem = get_object_or_404(Problem, id=problem_id)
+        criteria = EvaluationCriterion.objects.filter(problem=problem)
+        serializer = EvaluationCriterionSerializer(criteria, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, problem_id):
+        problem = get_object_or_404(Problem, id=problem_id)
+        serializer = EvaluationCriterionSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(problem=problem, author=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CriterionLikeView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, criterion_id):
+        criterion = get_object_or_404(EvaluationCriterion, id=criterion_id)
+        already_liked = CriterionLike.objects.filter(user=request.user, criterion=criterion).exists()
+        if already_liked:
+            return Response({'detail': 'Already liked'}, status=status.HTTP_400_BAD_REQUEST)
+
+        CriterionLike.objects.create(user=request.user, criterion=criterion)
+        return Response({'detail': 'Liked successfully'}, status=status.HTTP_201_CREATED)

@@ -23,7 +23,7 @@ function Login() {
       .then(data => {
         login(data.access, data.refresh, data.username);
         message.success('Login successful!');
-        alert("Login successful");
+        //alert("Login successful");
         navigate('/');
       })
       .catch(() => alert('Incorrect username or password!'));

@@ -164,6 +164,54 @@ async function deleteProposal(problemId) {
   }
 }
 
+// --- In useProblemHub.js ---
+
+ async function addEvaluationCriterion(problemId, content) {
+  const headers = token
+    ? {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      }
+    : { 'Content-Type': 'application/json' };
+
+  const res = await fetch(`${API_BASE_URL}/api/problemhub/proposal/${problemId}/criteria/`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ problem_id: problemId, content }),
+  });
+
+  if (!res.ok) throw new Error('Failed to submit suggestion');
+  return await res.json();
+}
+
+ async function likeEvaluationCriterion(criterionId) {
+  const headers = token
+    ? {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      }
+    : { 'Content-Type': 'application/json' };
+
+  const res = await fetch(`${API_BASE_URL}/api/problemhub/criteria/${criterionId}/like/`, {
+    method: 'POST',
+    headers,
+  });
+
+  if (!res.ok) throw new Error('Failed to like criterion');
+}
+
+async function fetchProposal(problemId) {
+  try {
+    const token = localStorage.getItem('access_token');
+    const res = await fetch(`${API_BASE_URL}/api/problemhub/proposal/${problemId}/`, { headers });
+    const data = await res.json();
+    return data;  // ⬅️ 把数据返回给调用者处理
+  } catch (error) {
+    console.error('Failed to fetch proposal:', error);
+    return null;
+  }
+}
+
 
   return {
     cycles,
@@ -176,10 +224,13 @@ async function deleteProposal(problemId) {
     fetchCurrentProblems,
     fetchAllProblems,
     fetchVotedProblems,
+    fetchProposal,
     submitProblem,
     voteProblem,
     unvoteProblem,
     deleteProposal,
+    addEvaluationCriterion,
+    likeEvaluationCriterion,
     
     setProblems, // ✅ 新增暴露，便于 ProblemHub.js 中直接更新 UI
 
