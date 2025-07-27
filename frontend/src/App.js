@@ -7,7 +7,7 @@ import { AuthProvider } from './contexts/AuthContext'; // ✅ 导入
 import AppHeader from './components/Header';
 import Home from './pages/Home';
 import ProblemHub from './pages/ProblemHub';
-import ModelDev from './pages/ModelDev';
+import ModelStudioPage from './pages/ModelStudioPage';
 import BattleCenter from './pages/BattleCenter';
 import Forum from './pages/Forum';
 import Login from './pages/Login';
@@ -36,7 +36,7 @@ function App() {
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/problem-hub" element={<ProblemHub />} />
-                <Route path="/model-dev" element={<ModelDev />} />
+                <Route path="/model-studio" element={<ModelStudioPage />} />
                 <Route path="/battle" element={<BattleCenter />} />
                 <Route path="/forum" element={<Forum />} />
                 <Route path="/login" element={<Login />} />

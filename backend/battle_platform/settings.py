@@ -11,6 +11,14 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+
+# 自动加载 .env 中的变量
+load_dotenv()
+
+# 安全地加载 API 密钥
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -46,6 +54,7 @@ INSTALLED_APPS = [
     'evaluation',
     'friends',  # 添加 friends 应用
     'problemhub',
+    'modelstudio',
 ]
 
 
@@ -115,6 +124,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
+
 
 TIME_ZONE = 'UTC'
 

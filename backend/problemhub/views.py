@@ -33,6 +33,39 @@ class CurrentCycleProblemView(APIView):
             "problems": serializer.data,
         })
 
+class WinnerByCycleView(APIView):
+    def get(self, request):
+        index = request.query_params.get('index', None)
+        all_cycles = list(Cycle.objects.order_by('start_time', 'id'))
+
+        if index is None:
+            return Response({'detail': 'index is required.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            index = int(index)
+            if index < 0 or index >= len(all_cycles):
+                return Response({'detail': 'Invalid index.'}, status=status.HTTP_400_BAD_REQUEST)
+        except ValueError:
+            return Response({'detail': 'Index must be an integer.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        cycle = all_cycles[index]
+        top_problem = (
+            Problem.objects
+            .filter(cycle=cycle)
+            .annotate(vote_count=Count('votes'))
+            .order_by('-vote_count', '-created_at')  # tie-breaker: newer wins
+            .first()
+        )
+
+        if not top_problem:
+            return Response({'detail': 'No proposals found in this cycle.'}, status=status.HTTP_404_NOT_FOUND)
+
+        return Response({
+            'cycle': CycleSerializer(cycle).data,
+            'problem': ProblemSerializer(top_problem).data,
+            'votes': top_problem.vote_count,
+        })
+
 
 class SubmitProblemView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -218,3 +251,70 @@ class CriterionUpdateView(APIView):
             "author_username": criterion.author.username,
             "problem": criterion.problem.id,
         }, status=status.HTTP_200_OK)
+# vie
+import json
+from openai import OpenAI
+from django.conf import settings
+from .utils import generate_prompt_from_proposal
+
+class EvaluateProposalView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        proposal = request.data
+        prompt = generate_prompt_from_proposal(proposal)
+
+        try:
+            client = OpenAI(api_key=settings.OPENAI_API_KEY)
+            response = client.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {"role": "system", "content": "你是一个AI问题审核官，请根据评分标准评估用户提交的AI项目提案，并给出是否通过及理由。"},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.3
+            )
+            result = response.choices[0].message.content
+            return Response({"evaluation": result})
+
+        except Exception as e:
+            return Response({"error": f"OpenAI API call failed: {str(e)}"}, status=502)
+
+
+from django.utils.timezone import now
+from .models import Cycle
+
+class ActiveCycleContextView(APIView):
+    """
+    提供当前系统时间下的全局 cycle index 和状态信息
+    - cycle_index: 当前正在进行的 cycle 的 index（按 start_time 排序）
+    - status: 'active', 'between_cycles', 'before_all', 'after_all'
+    """
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        current_time = now()
+        all_cycles = list(Cycle.objects.order_by('start_time', 'id'))
+
+        if not all_cycles:
+            return Response({'detail': 'No cycles defined.'}, status=status.HTTP_404_NOT_FOUND)
+
+        for i, cycle in enumerate(all_cycles):
+            if cycle.start_time <= current_time <= cycle.end_time:
+                return Response({'cycle_index': i, 'status': 'active'})
+
+        # now 在两个 cycle 之间
+        for i in range(1, len(all_cycles)):
+            prev_cycle = all_cycles[i - 1]
+            next_cycle = all_cycles[i]
+            if prev_cycle.end_time < current_time < next_cycle.start_time:
+                return Response({'cycle_index': i - 1, 'status': 'between_cycles'})
+
+        # now 在所有 cycle 开始之前
+        if current_time < all_cycles[0].start_time:
+            return Response({'cycle_index': -1, 'status': 'before_all'})
+
+        # now 在所有 cycle 结束之后
+        if current_time > all_cycles[-1].end_time:
+            return Response({'cycle_index': len(all_cycles) - 1, 'status': 'after_all'})
+
+        return Response({'detail': 'Unexpected cycle state.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

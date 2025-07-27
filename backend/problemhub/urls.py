@@ -15,6 +15,9 @@ from .views import (
     CriterionUnlikeView,
     CriterionDeleteView,
     CriterionUpdateView,
+    EvaluateProposalView,
+    ActiveCycleContextView,
+    WinnerByCycleView,
 )
 
 urlpatterns = [
@@ -24,6 +27,7 @@ urlpatterns = [
     path('vote/<int:problem_id>/', VoteProblemView.as_view(), name='vote-problem'),
     path('unvote/<int:problem_id>/', CancelVoteView.as_view(), name='cancel-vote'),
     path('all-problems/', AllProblemsView.as_view(), name='all-problems'),
+    path('winner/', WinnerByCycleView.as_view(), name='winner-by-cycle'),
     path('voted-ids/', VotedProblemIdsView.as_view(), name='voted-ids'),
     path('proposal/<int:problem_id>/', ProposalDetailView.as_view()),
     path('proposal/<int:problem_id>/criteria/', EvaluationCriterionListCreateView.as_view(), name='proposal-criteria'),
@@ -33,5 +37,8 @@ urlpatterns = [
 
     path('criteria/<int:pk>/update/', CriterionUpdateView.as_view(), name='update-criterion'),
 
+    path('llm-problem-evaluate/', EvaluateProposalView.as_view()),
+
+    path('active-context/', ActiveCycleContextView.as_view(), name='active-cycle-context'),
 
 ]

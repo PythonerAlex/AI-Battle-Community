@@ -8,6 +8,7 @@ db.sqlite3-wal
 *.pot
 *.po
 *.mo
+.env
 
 # 静态文件和媒体文件（根据需要保留或忽略）
 /static/

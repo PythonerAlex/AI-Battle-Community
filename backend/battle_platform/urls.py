@@ -27,5 +27,6 @@ urlpatterns = [
     # main_project/urls.py
 
     path('api/problemhub/', include('problemhub.urls')),
+    path('api/modelstudio/', include('modelstudio.urls')),
 
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

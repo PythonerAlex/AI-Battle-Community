@@ -1,3 +1,215 @@
+/*// ✅ 新版 ProblemHub.js：不再传入所有 problems，完全基于 current/justEnded 与 getWinnerByIndex 动态拉取
+
+import React, { useState, useEffect } from 'react';
+import { Alert, Typography, message } from 'antd';
+import { useAuth } from '../contexts/AuthContext';
+import useProblemHub from '../hooks/useProblemHub';
+import CurrentCyclePanel from '../components/CurrentCyclePanel';
+import PastWinnersSummary from '../components/PastWinnersSummary';
+import dayjs from 'dayjs';
+import duration from 'dayjs/plugin/duration';
+dayjs.extend(duration);
+
+const { Title } = Typography;
+
+function ProblemHub() {
+  const [modalVisible, setModalVisible] = useState(false);
+  const [timeLeft, setTimeLeft] = useState('');
+  const [showHistory, setShowHistory] = useState(false);
+  const [currentCycle, setCurrentCycle] = useState(null);
+  const [justEndedCycle, setJustEndedCycle] = useState(null);
+  const [nextCycle, setNextCycle] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showOnlyMine, setShowOnlyMine] = useState(false);
+  const [selectedTags, setSelectedTags] = useState([]);
+  const [tagFilterMode, setTagFilterMode] = useState('OR');
+
+  const { user } = useAuth();
+  const currentUser = user?.username;
+
+  const {
+    cycles,
+    problems,
+    votedIds,
+    fetchCycles,
+    fetchCurrentProblems,
+    fetchVotedProblems,
+    submitProblem,
+    voteProblem,
+    unvoteProblem,
+    deleteProposal,
+    setProblems,
+  } = useProblemHub();
+
+  useEffect(() => {
+    fetchCycles();
+    fetchCurrentProblems();
+    fetchVotedProblems();
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = dayjs();
+
+      const current = cycles.find(
+        (c) => now.isAfter(dayjs(c.start_time)) && now.isBefore(dayjs(c.end_time))
+      );
+      setCurrentCycle(current || null);
+
+      const endedCycles = cycles
+        .filter((c) => dayjs(c.end_time).isBefore(now))
+        .sort((a, b) => dayjs(b.end_time).diff(dayjs(a.end_time)));
+      setJustEndedCycle(!current && endedCycles.length > 0 ? endedCycles[0] : null);
+
+      const futureCycles = cycles
+        .filter((c) => dayjs(c.start_time).isAfter(now))
+        .sort((a, b) => dayjs(a.start_time).diff(dayjs(b.start_time)));
+      setNextCycle(futureCycles.length > 0 ? futureCycles[0] : null);
+
+      if (current) {
+        const diff = dayjs(current.end_time).diff(now);
+        if (diff <= 0) {
+          setTimeLeft('⏳ 即将结束...');
+        } else {
+          const dur = dayjs.duration(diff);
+          const days = Math.floor(dur.asDays());
+          const hours = dur.hours();
+          const minutes = dur.minutes();
+          const seconds = dur.seconds();
+          setTimeLeft(`${days}天 ${hours}小时 ${minutes}分 ${seconds}秒`);
+        }
+      } else {
+        setTimeLeft('');
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [cycles]);
+
+  const handleVote = async (id) => {
+    if (!currentUser) return message.info('Please login to vote.');
+    if (votedIds.has(id)) return;
+    await voteProblem(id);
+    const updated = problems.map((p) =>
+      p.id === id ? { ...p, votes: p.votes + 1 } : p
+    );
+    setProblems(updated);
+  };
+
+  const handleSubmit = async (newProblem) => {
+    const response = await submitProblem(newProblem);
+    if (response && response.id) {
+      message.success('Problem submitted!');
+      fetchCurrentProblems();
+    }
+  };
+
+  const handleUnvote = async (id) => {
+    if (!currentUser) return message.info('Please login to unvote.');
+    await unvoteProblem(id);
+    setProblems((prev) =>
+      prev.map((p) =>
+        p.id === id ? { ...p, votes: Math.max(0, p.votes - 1) } : p
+      )
+    );
+  };
+
+  const handleDelete = async (id) => {
+    await deleteProposal(id);
+    setProblems((prev) => prev.filter((p) => p.id !== id));
+    message.success('Proposal deleted.');
+  };
+
+  const allTags = Array.from(
+    new Set(
+      problems
+        .flatMap((p) => Array.isArray(p.tags) ? p.tags : String(p.tags || '').split(','))
+        .map((t) => t.trim())
+    )
+  );
+
+  let displayedProblems = problems;
+  if (showOnlyMine && currentUser) {
+    displayedProblems = displayedProblems.filter((p) => p.author === currentUser);
+  }
+  if (searchTerm.trim()) {
+    const keyword = searchTerm.toLowerCase();
+    displayedProblems = displayedProblems.filter((p) =>
+      p.title.toLowerCase().includes(keyword) ||
+      p.description.toLowerCase().includes(keyword) ||
+      (Array.isArray(p.tags) && p.tags.some((tag) => tag.toLowerCase().includes(keyword)))
+    );
+  }
+  if (selectedTags.length > 0) {
+    displayedProblems = displayedProblems.filter((p) => {
+      const tags = Array.isArray(p.tags)
+        ? p.tags.map((t) => t.trim())
+        : String(p.tags || '').split(',').map((t) => t.trim());
+
+      if (tagFilterMode === 'AND') {
+        return selectedTags.every((tag) => tags.includes(tag));
+      } else {
+        return selectedTags.some((tag) => tags.includes(tag));
+      }
+    });
+  }
+
+  if (currentCycle) {
+    return (
+      <CurrentCyclePanel
+        currentCycle={currentCycle}
+        timeLeft={timeLeft}
+        currentUser={currentUser}
+        modalVisible={modalVisible}
+        setModalVisible={setModalVisible}
+        showOnlyMine={showOnlyMine}
+        setShowOnlyMine={setShowOnlyMine}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        selectedTags={selectedTags}
+        setSelectedTags={setSelectedTags}
+        tagFilterMode={tagFilterMode}
+        setTagFilterMode={setTagFilterMode}
+        allTags={allTags}
+        displayedProblems={displayedProblems}
+        handleVote={handleVote}
+        handleUnvote={handleUnvote}
+        votedIds={votedIds}
+        handleDelete={handleDelete}
+        handleSubmit={handleSubmit}
+        showHistory={showHistory}
+        setShowHistory={setShowHistory}
+        cycles={cycles}
+      />
+    );
+  }
+
+  if (justEndedCycle) {
+    return (
+      <PastWinnersSummary
+        cycles={cycles}
+        justEndedCycle={justEndedCycle}
+        nextCycle={nextCycle}
+        currentUser={currentUser}
+      />
+    );
+  }
+
+  return (
+    <div style={{ padding: 24 }}>
+      <Title level={3}>Problem Hub</Title>
+      <Alert
+        message="Loading ..."
+        description="The page is coming soon..."
+        type="info"
+        showIcon
+      />
+    </div>
+  );
+}
+
+export default ProblemHub;
+*/
+
 import React, { useState, useEffect } from 'react';
 import { Button, Tabs, Card, Tag, Space, Typography, Alert, Input, Switch, message } from 'antd';
 import { LikeOutlined } from '@ant-design/icons';
@@ -6,7 +218,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import useProblemHub from '../hooks/useProblemHub';
 import ProblemList from '../components/ProblemList';
-import CycleSummary from '../components/CycleSummary';  
+import CycleSummary from '../components/CycleSummary';
 import CurrentCyclePanel from '../components/CurrentCyclePanel';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
@@ -120,23 +332,23 @@ function ProblemHub() {
     }
   };
 
-// ✅ 取消投票 + 乐观更新
-const handleUnvote = async (id) => {
-  if (!currentUser) return message.info('Please login to unvote.');
-  await unvoteProblem(id);
-  setProblems((prev) =>
-    prev.map((p) =>
-      p.id === id ? { ...p, votes: Math.max(0, p.votes - 1) } : p
-    )
-  );
-};
+  // ✅ 取消投票 + 乐观更新
+  const handleUnvote = async (id) => {
+    if (!currentUser) return message.info('Please login to unvote.');
+    await unvoteProblem(id);
+    setProblems((prev) =>
+      prev.map((p) =>
+        p.id === id ? { ...p, votes: Math.max(0, p.votes - 1) } : p
+      )
+    );
+  };
 
-// ✅ 删除提案 + 乐观移除
-const handleDelete = async (id) => {
-  await deleteProposal(id);
-  setProblems((prev) => prev.filter((p) => p.id !== id));
-  message.success('Proposal deleted.');
-};
+  // ✅ 删除提案 + 乐观移除
+  const handleDelete = async (id) => {
+    await deleteProposal(id);
+    setProblems((prev) => prev.filter((p) => p.id !== id));
+    message.success('Proposal deleted.');
+  };
 
 
   const allTags = Array.from(
@@ -180,46 +392,46 @@ const handleDelete = async (id) => {
     });
   }
 
- if (currentCycle )
- return ( 
-  <CurrentCyclePanel
-    currentCycle={currentCycle}
-    timeLeft={timeLeft}
-    currentUser={currentUser}
-    modalVisible={modalVisible}
-    setModalVisible={setModalVisible}
-    showOnlyMine={showOnlyMine}
-    setShowOnlyMine={setShowOnlyMine}
-    searchTerm={searchTerm}
-    setSearchTerm={setSearchTerm}
-    selectedTags={selectedTags}
-    setSelectedTags={setSelectedTags}
-    tagFilterMode={tagFilterMode}
-    setTagFilterMode={setTagFilterMode}
-    allTags={allTags}
-    displayedProblems={displayedProblems}
-    handleVote={handleVote}
-    handleUnvote={handleUnvote}
-    votedIds={votedIds}
-    handleDelete={handleDelete}
-    handleSubmit={handleSubmit}
-    showHistory={showHistory}
-    setShowHistory={setShowHistory}
-    cycles={cycles}
-    problems={problems}
-  />
-) 
+  if (currentCycle)
+    return (
+      <CurrentCyclePanel
+        currentCycle={currentCycle}
+        timeLeft={timeLeft}
+        currentUser={currentUser}
+        modalVisible={modalVisible}
+        setModalVisible={setModalVisible}
+        showOnlyMine={showOnlyMine}
+        setShowOnlyMine={setShowOnlyMine}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        selectedTags={selectedTags}
+        setSelectedTags={setSelectedTags}
+        tagFilterMode={tagFilterMode}
+        setTagFilterMode={setTagFilterMode}
+        allTags={allTags}
+        displayedProblems={displayedProblems}
+        handleVote={handleVote}
+        handleUnvote={handleUnvote}
+        votedIds={votedIds}
+        handleDelete={handleDelete}
+        handleSubmit={handleSubmit}
+        showHistory={showHistory}
+        setShowHistory={setShowHistory}
+        cycles={cycles}
+        problems={problems}
+      />
+    )
 
   if (justEndedCycle) {
-  return (
-    <CycleSummary
-      cycle={justEndedCycle}
-      problems={problems}
-      nextCycle={nextCycle}
-      currentUser={currentUser}
-    />
-  );
-}
+    return (
+      <CycleSummary
+        cycle={justEndedCycle}
+        problems={problems}
+        nextCycle={nextCycle}
+        currentUser={currentUser}
+      />
+    );
+  }
   return (
     <div style={{ padding: 24 }}>
       <Title level={3}>Problem Hub</Title>
@@ -235,6 +447,7 @@ const handleDelete = async (id) => {
 
 
 export default ProblemHub;
+
 
 
 /*import React, { useState, useEffect } from 'react';

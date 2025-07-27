@@ -50,7 +50,7 @@ function AppHeader() {
       <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['home']} onClick={(e) => navigate(`/${e.key === 'home' ? '' : e.key}`)} style={{ flex: 1 }}>
         <Menu.Item key="home">Home</Menu.Item>
         <Menu.Item key="problem-hub">Problem Hub</Menu.Item>
-        <Menu.Item key="model-dev">Model Design and Training</Menu.Item>
+        <Menu.Item key="model-studio">Model Studio</Menu.Item>
         <Menu.Item key="battle">Model Battle</Menu.Item>
         <Menu.Item key="forum">Forum</Menu.Item>
       </Menu>
