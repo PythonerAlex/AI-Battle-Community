@@ -1,6 +1,106 @@
 // src/components/ModelStudio/ModelStudio.js
+
 import React, { useState } from 'react';
-import { Button, Typography, List } from 'antd';
+import { Button, Typography, List, Divider, Space } from 'antd';
+import { UploadOutlined, CloudUploadOutlined } from '@ant-design/icons';
+import useModelStudio from '../../hooks/useModelStudio';
+import ModelCard from './ModelCard';
+import DatasetCard from './DatasetCard';
+import UploadModelModal from './UploadModelModal';
+import UploadDatasetModal from './UploadDatasetModal'; // ✅ 新引入
+
+const { Title } = Typography;
+
+const ModelStudio = ({ prevProblem }) => {
+  const {
+    models,
+    datasets,
+    togglePublic,
+    deleteModel,
+    editModel,
+    uploadModel,
+    uploadDataset,
+    deleteDataset,
+    toggleDatasetPublic,
+  } = useModelStudio();
+
+  const [isUploadModelVisible, setIsUploadModelVisible] = useState(false);
+  const [isUploadDatasetVisible, setIsUploadDatasetVisible] = useState(false);
+
+  return (
+    <div style={{ padding: '16px' }}>
+      {/*<Title level={3}>🔧 我的模型</Title>*/}
+
+      <Space style={{ marginBottom: 16 }}>
+        <Button
+          type="primary"
+          icon={<CloudUploadOutlined />}
+          onClick={() => setIsUploadDatasetVisible(true)}
+        >
+          Upload new dataset
+        </Button>
+
+        <Button
+
+          icon={<UploadOutlined />}
+          onClick={() => setIsUploadModelVisible(true)}
+        >
+          Upload new model
+        </Button>
+
+
+      </Space>
+      <Divider>📦 My models</Divider>
+      <List
+        grid={{ gutter: 16, column: 2 }}
+        dataSource={models}
+        renderItem={(item) => (
+          <List.Item>
+            <ModelCard
+              model={item}
+              onTogglePublic={togglePublic}
+              onDelete={deleteModel}
+              onEdit={editModel}
+            />
+          </List.Item>
+        )}
+      />
+
+      <Divider>📦 My datasets</Divider>
+      <List
+        grid={{ gutter: 16, column: 2 }}
+        dataSource={datasets}
+        renderItem={(item) => (
+          <List.Item>
+            <DatasetCard dataset={item} onDelete={deleteDataset} onToggleDatasetPublic={toggleDatasetPublic}/>
+          </List.Item>
+        )}
+      />
+
+
+      <UploadModelModal
+        visible={isUploadModelVisible}
+        onCancel={() => setIsUploadModelVisible(false)}
+        onUpload={uploadModel}
+        problem={prevProblem}
+        datasets={datasets} // ✅ 将数据集列表传入以供选择
+      />
+
+
+      <UploadDatasetModal
+        visible={isUploadDatasetVisible}
+        onCancel={() => setIsUploadDatasetVisible(false)}
+        onUpload={uploadDataset}
+      />
+    </div>
+  );
+};
+
+export default ModelStudio;
+
+/*
+import React, { useState } from 'react';
+import { Button, Typography, List,Divider } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import useModelStudio from '../../hooks/useModelStudio';
 import ModelCard from './ModelCard';
@@ -53,6 +153,21 @@ const ModelStudio = ({ prevProblem }) => {
         )}
       />
 
+      <Divider>📦 我的数据集</Divider>
+      <List
+        grid={{ gutter: 16, column: 2 }}
+        dataSource={datasets}
+        renderItem={(item) => (
+          <List.Item>
+            <DatasetCard
+              dataset={item}
+              onDelete={deleteDataset}
+            />
+          </List.Item>
+        )}
+      />
+
+
       <UploadModelModal
         visible={isUploadVisible}
         onCancel={() => setIsUploadVisible(false)}
@@ -65,7 +180,7 @@ const ModelStudio = ({ prevProblem }) => {
 
 export default ModelStudio;
 
-
+*/
 
 
 /*import React, { useState } from 'react';

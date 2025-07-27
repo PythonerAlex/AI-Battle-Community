@@ -1,7 +1,7 @@
 # modelstudio/serializers.py
 
 from rest_framework import serializers
-from .models import MLModel, ModelMetric
+from .models import MLModel, ModelMetric,Dataset
 
 class ModelMetricSerializer(serializers.ModelSerializer):
     class Meta:
@@ -27,3 +27,19 @@ class MLModelSerializer(serializers.ModelSerializer):
             'problem',
             'metrics',
         ]
+
+class DatasetSerializer(serializers.ModelSerializer):
+    owner = serializers.StringRelatedField(read_only=True)
+
+    class Meta:
+        model = Dataset
+        fields = [
+            'id',
+            'name',
+            'description',
+            'file',
+            'owner',
+            'created_at',
+            'is_public', 
+        ]
+        read_only_fields = ['owner', 'created_at']

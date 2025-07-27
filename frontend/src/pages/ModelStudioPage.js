@@ -49,7 +49,7 @@ const ModelStudioPage = () => {
       setCountdown(`${days}D:${hours}H:${minutes}M:${seconds}S.`);
 
 
-      if (diff <= 0) {  
+      if (diff <= 0) {
         window.location.reload(); // 周期切换自动刷新
       }
     }, 1000);
@@ -77,7 +77,7 @@ const ModelStudioPage = () => {
             </Text>
             <Text>
               <strong>Count Down：</strong>{' '}
-              {countdown ? (  
+              {countdown ? (
                 <Text type="danger">{countdown}</Text>
               ) : (
                 <Text type="secondary">等待中</Text>
@@ -88,19 +88,24 @@ const ModelStudioPage = () => {
       )}
 
       <Tabs defaultActiveKey="studio" type="card" size="large">
-        <TabPane tab="🎛 我的模型" key="studio">
-          <ModelStudio prevProblem={prevProblem}/>
+        <TabPane tab="🎛 My models" key="studio">
+          {!isWinnerLoading && prevProblem ? (
+            <ModelStudio prevProblem={prevProblem} />
+          ) : (
+            <Typography.Text type="secondary">加载上一轮问题中...</Typography.Text>
+          )}
         </TabPane>
-        <TabPane tab="🌍 模型展示" key="gallery">
+
+        <TabPane tab="🌍 Models Display" key="gallery">
           <ModelGallery />
         </TabPane>
-        <TabPane tab="📂 数据集中心" key="datasets">
+        <TabPane tab="📂 Dataset display" key="datasets">
           <DatasetHub />
         </TabPane>
-        <TabPane tab="🗳 测试集投票" key="testsets">
+        <TabPane tab="🗳 Vote Testset" key="testsets">
           <TestSetSelector />
         </TabPane>
-        <TabPane tab="🧠 经验分享" key="insights">
+        <TabPane tab="🧠 Experience Sharing" key="insights">
           <InsightsFeed />
         </TabPane>
       </Tabs>

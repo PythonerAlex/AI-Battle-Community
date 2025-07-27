@@ -52,7 +52,7 @@ function AppHeader() {
         <Menu.Item key="problem-hub">Problem Hub</Menu.Item>
         <Menu.Item key="model-studio">Model Studio</Menu.Item>
         <Menu.Item key="battle">Model Battle</Menu.Item>
-        <Menu.Item key="forum">Forum</Menu.Item>
+        <Menu.Item key="forum">Deployment showcase</Menu.Item>
       </Menu>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
