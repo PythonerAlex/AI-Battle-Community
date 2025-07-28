@@ -32,7 +32,14 @@ export default function useModelStudio() {
         formData.append('problem_id', newModel.taskId);
         formData.append('is_public', newModel.isPublic ? 'true' : 'false');
         formData.append('model_file', newModel.fileObj); // 来自 Upload
-        formData.append('dataset_id', newModel.datasetId);
+
+        if (newModel.datasetId) {
+            formData.append('dataset_id', newModel.datasetId);
+        }
+          // ✅ 添加 metrics 字段，作为 JSON 字符串
+  if (newModel.metrics && Object.keys(newModel.metrics).length > 0) {
+    formData.append('metrics', JSON.stringify(newModel.metrics));
+  }
 
         try {
             const res = await fetch(`${API_BASE_URL}/api/modelstudio/upload/`, {
@@ -97,6 +104,24 @@ export default function useModelStudio() {
         console.log('TODO: 编辑模型:', id);
     };
 
+    const [availableMetrics, setAvailableMetrics] = useState([]);
+    const fetchAvailableMetrics = async () => {
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/modelstudio/available-metrics/`, {
+                method: 'GET',
+                headers,
+            }
+            );
+            if (!res.ok) throw new Error('Failed to fetch metrics');
+            const data = await res.json();
+            setAvailableMetrics(data);
+        } catch (err) {
+            console.error('Error fetching metrics:', err);
+            message.error('无法获取可用评估指标');
+        }
+    };
+
+
     // ---------- 数据集 ----------
     const fetchDatasets = async () => {
         try {
@@ -113,7 +138,7 @@ export default function useModelStudio() {
         formData.append('name', newDataset.name);
         formData.append('is_public', newDataset.isPublic ? 'true' : 'false');
         formData.append('file', newDataset.fileObj);  // ✅ 字段名应该为 file，确保和后端 serializer 匹配
-
+        formData.append('description', newDataset.description || '');
         const token = localStorage.getItem('access_token');
 
         try {
@@ -156,37 +181,39 @@ export default function useModelStudio() {
         }
     };
 
-const toggleDatasetPublic = async (id) => {
-  try {
-    const res = await fetch(`${API_BASE_URL}/api/modelstudio/datasets/${id}/toggle-public/`, {
-      method: 'POST',
-      headers, // 这里 headers 应该包含 Authorization 头
-    });
+    const toggleDatasetPublic = async (id) => {
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/modelstudio/datasets/${id}/toggle-public/`, {
+                method: 'POST',
+                headers, // 这里 headers 应该包含 Authorization 头
+            });
 
-    if (res.ok) {
-      const data = await res.json();
-      setDatasets((prev) =>
-        prev.map((d) => (d.id === id ? { ...d, is_public: data.is_public } : d))
-      );
-    } else {
-      message.error('切换失败');
-    }
-  } catch (err) {
-    console.error('Toggle error:', err);
-    message.error('切换公开状态失败');
-  }
-};
+            if (res.ok) {
+                const data = await res.json();
+                setDatasets((prev) =>
+                    prev.map((d) => (d.id === id ? { ...d, is_public: data.is_public } : d))
+                );
+            } else {
+                message.error('切换失败');
+            }
+        } catch (err) {
+            console.error('Toggle error:', err);
+            message.error('切换公开状态失败');
+        }
+    };
 
 
     // 初始化加载
     useEffect(() => {
         fetchModels();
         fetchDatasets();
+        fetchAvailableMetrics();
     }, []);
 
     return {
         models,
         datasets,
+        availableMetrics,
         togglePublic,
         deleteModel,
         uploadModel,
@@ -196,6 +223,7 @@ const toggleDatasetPublic = async (id) => {
         uploadDataset,
         deleteDataset,
         toggleDatasetPublic,
+
     };
 }
 

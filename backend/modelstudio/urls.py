@@ -1,6 +1,6 @@
 # modelstudio/urls.py
 from django.urls import path
-from .views import UploadModelView, MyModelsView, DeleteModelView, TogglePublicView,DatasetUploadView, MyDatasetsView,DatasetDetailView,ToggleDatasetPublicView
+from .views import UploadModelView, MyModelsView, DeleteModelView,TogglePublicView,DatasetUploadView, MyDatasetsView,DatasetDetailView,ToggleDatasetPublicView,AvailableMetricsView
 
 urlpatterns = [
     path('upload/', UploadModelView.as_view(), name='upload-model'),   
@@ -8,6 +8,7 @@ urlpatterns = [
     path('<int:pk>/', DeleteModelView.as_view(), name='delete-model'),
     path('<int:pk>/toggle-public/', TogglePublicView.as_view(), name='toggle-public'),
 
+    path('available-metrics/', AvailableMetricsView.as_view(), name='available-metrics'),
     # ✅ Dataset endpoints
     path('datasets/upload/', DatasetUploadView.as_view(), name='upload-dataset'),
     path('datasets/', MyDatasetsView.as_view(), name='my-datasets'),

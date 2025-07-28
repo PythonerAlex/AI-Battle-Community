@@ -15,6 +15,7 @@ const ModelStudio = ({ prevProblem }) => {
   const {
     models,
     datasets,
+    availableMetrics,
     togglePublic,
     deleteModel,
     editModel,
@@ -37,7 +38,7 @@ const ModelStudio = ({ prevProblem }) => {
           icon={<CloudUploadOutlined />}
           onClick={() => setIsUploadDatasetVisible(true)}
         >
-          Upload new dataset
+          Upload new Dataset
         </Button>
 
         <Button
@@ -45,7 +46,7 @@ const ModelStudio = ({ prevProblem }) => {
           icon={<UploadOutlined />}
           onClick={() => setIsUploadModelVisible(true)}
         >
-          Upload new model
+          Upload new Model
         </Button>
 
 
@@ -84,6 +85,7 @@ const ModelStudio = ({ prevProblem }) => {
         onUpload={uploadModel}
         problem={prevProblem}
         datasets={datasets} // ✅ 将数据集列表传入以供选择
+        metricOptions={availableMetrics}
       />
 
 

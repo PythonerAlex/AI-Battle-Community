@@ -11,7 +11,7 @@ class Dataset(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     is_public = models.BooleanField(default=False)
-    
+
     def __str__(self):
         return self.name
 class MLModel(models.Model):
@@ -27,11 +27,9 @@ class MLModel(models.Model):
     # 可选缓存字段
     task_title = models.CharField(max_length=255, blank=True)
 
-    train_dataset = models.ForeignKey(
-        Dataset, null=True, blank=True, on_delete=models.SET_NULL, related_name='used_for_training'
-    )
-    test_dataset = models.ForeignKey(
-        Dataset, null=True, blank=True, on_delete=models.SET_NULL, related_name='used_for_testing'
+    # ✅ 新增：关联一个 Dataset
+    dataset = models.ForeignKey(
+        Dataset, null=True, blank=True, on_delete=models.SET_NULL, related_name='models'
     )
 
     def __str__(self):

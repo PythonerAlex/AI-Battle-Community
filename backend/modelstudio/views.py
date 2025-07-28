@@ -6,9 +6,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 from django.shortcuts import get_object_or_404
+import json
 
-
-from .models import MLModel
+from .models import MLModel,ModelMetric
 from .serializers import MLModelSerializer
 from problemhub.models import Problem  # ✅ 已有的 app
 
@@ -25,6 +25,9 @@ class UploadModelView(APIView):
         is_public = data.get('is_public', 'false').lower() == 'true'  # 强制转为 bool
         problem_id = data.get('problem_id')
         file = data.get('model_file')
+        dataset_id = data.get('dataset_id') 
+
+        metrics_raw = data.get('metrics')  # JSON string
 
         if not all([name, problem_id, file]):
             return Response({'detail': 'Missing required fields.'}, status=400)
@@ -34,15 +37,31 @@ class UploadModelView(APIView):
         except Problem.DoesNotExist:
             return Response({'detail': 'Problem not found.'}, status=404)
 
+        dataset = None
+        if dataset_id:
+            try:
+                dataset = Dataset.objects.get(id=dataset_id, owner=user)
+            except Dataset.DoesNotExist:
+                return Response({'detail': 'Dataset not found or not owned by user.'}, status=404)
+
         model = MLModel.objects.create(
             owner=user,
             name=name,
             problem=problem,
             model_file=file,
             is_public=is_public,
-            task_title=problem.title
+            task_title=problem.title,
+            dataset=dataset,
+            #metrics=metrics,
         )
-
+        if metrics_raw:
+            try:
+                metrics_dict = json.loads(metrics_raw)
+                for key, val in metrics_dict.items():
+                    if val is not None:
+                        ModelMetric.objects.create(model=model, name=key, value=val)
+            except json.JSONDecodeError:
+                return Response({'detail': 'Invalid metrics format.'}, status=400)
         serializer = MLModelSerializer(model)
         return Response(serializer.data, status=201)
 
@@ -74,6 +93,13 @@ class TogglePublicView(APIView):
         model.is_public = not model.is_public
         model.save()
         return Response({'is_public': model.is_public})
+
+class AvailableMetricsView(APIView):
+    permission_classes = [IsAuthenticated]  # 或根据需要限制权限
+
+    def get(self, request):
+        names = ModelMetric.objects.values_list('name', flat=True).distinct()
+        return Response(sorted(names))
 
 
 from rest_framework.parsers import MultiPartParser, FormParser

@@ -1,6 +1,5 @@
 // src/pages/ModelStudioPage.js
 
-// src/pages/ModelStudioPage.js
 import React, { useEffect, useState } from 'react';
 import { Tabs, Typography, Card, Space } from 'antd';
 import ModelStudio from '../components/ModelStudio/ModelStudio';

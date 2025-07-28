@@ -13,7 +13,8 @@ class MLModelSerializer(serializers.ModelSerializer):
     metrics = ModelMetricSerializer(many=True, read_only=True)
     owner = serializers.StringRelatedField(read_only=True)
     problem = serializers.PrimaryKeyRelatedField(read_only=True)
-
+    dataset = serializers.PrimaryKeyRelatedField(queryset=Dataset.objects.all(), allow_null=True, required=False)
+    dataset_name = serializers.CharField(source="dataset.name", read_only=True)
     class Meta:
         model = MLModel
         fields = [
@@ -25,6 +26,8 @@ class MLModelSerializer(serializers.ModelSerializer):
             'model_file',
             'owner',
             'problem',
+            'dataset', 
+            'dataset_name',
             'metrics',
         ]
 
