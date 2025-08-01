@@ -1,10 +1,24 @@
 import React from 'react';
 import { Typography, Button, Row, Col, Card, Avatar, Space, Divider } from 'antd';
 import { SmileOutlined, BulbOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons';
-
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 const { Title, Paragraph, Text } = Typography;
 
+
 function Home() {
+  const { user } = useAuth(); // 订阅 user 状态
+
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    if (user) {
+      navigate('/problem-hub');
+    } else {
+      navigate('/register');
+    }
+  };
+
   return (
     <div style={{ padding: '40px' }}>
       {/* Hero Section */}
@@ -31,8 +45,11 @@ function Home() {
         <Paragraph style={{ color: 'white', fontSize: '18px' }}>
           From youth, by youth, uniting the community — using AI to build a better future for all.
         </Paragraph>
-        <Button type="primary" size="large" href="/register">
+        {/* <Button type="primary" size="large" href="/register">
           Get Started Now
+        </Button>*/}
+        <Button type="primary" size="large" onClick={handleClick}>
+          {user ? 'Go proposing problem' : 'Get Started Now'}
         </Button>
       </div>
 
@@ -301,8 +318,14 @@ function Home() {
           Join our global community and turn your ideas into real AI-powered solutions.
         </Paragraph>
         <Space>
-          <Button type="primary" size="large" href="/register">Join Now</Button>
-          <Button size="large" href="/about">Learn More</Button>
+          {/*<Button type="primary" size="large" href="/register">Join Now</Button>*/}
+          <Button type="primary" size="large" onClick={handleClick}>
+            {user ? 'Go proposing problem' : 'Get Started Now'}
+          </Button>
+          {/*<Button size="large" href="/about">Learn More</Button>*/}
+          <Button size="large" onClick={() => navigate('/about')}>
+            Learn More
+          </Button>
         </Space>
       </div>
 

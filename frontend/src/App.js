@@ -15,7 +15,7 @@ import Register from './pages/Register';
 import RoomPage from './pages/RoomPage';
 import { FriendsProvider } from './contexts/FriendsContext';
 import ProposalDetailPage from './pages/ProposalDetailPage';
-
+import About from './pages/About'; // ✅ 路径根据项目结构修改
 import 'antd/dist/reset.css';
 
 import GlobalMessageListener from './components/friends/GlobalMessageListener';
@@ -44,7 +44,7 @@ function App() {
                 <Route path="/room/:roomId" element={<RoomPage />} />
 
                 <Route path="/problem/:id" element={<ProposalDetailPage />} />
-                
+                <Route path="/about" element={<About />} />
               </Routes>
             </Content>
           </Layout>
