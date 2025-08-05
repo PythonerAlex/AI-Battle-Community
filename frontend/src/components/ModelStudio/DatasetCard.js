@@ -30,11 +30,11 @@ const DatasetCard = ({ dataset, onDelete, onToggleDatasetPublic }) => {
           />
         </Tooltip>,
 
-        <Tooltip title="Download dataset" key="download">
+ /*       <Tooltip title="Download dataset" key="download">
           <a href={file} target="_blank" rel="noopener noreferrer">
             <CloudDownloadOutlined />
           </a>
-        </Tooltip>,
+        </Tooltip>,*/
         <Tooltip title="Delete dataset" key="delete">
           <DeleteOutlined onClick={() => onDelete?.(id)} />
         </Tooltip>,

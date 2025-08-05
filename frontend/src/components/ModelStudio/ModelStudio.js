@@ -7,7 +7,8 @@ import useModelStudio from '../../hooks/useModelStudio';
 import ModelCard from './ModelCard';
 import DatasetCard from './DatasetCard';
 import UploadModelModal from './UploadModelModal';
-import UploadDatasetModal from './UploadDatasetModal'; // ✅ 新引入
+import UploadDatasetModal from './UploadDatasetModal';
+import EditModelModal from './EditModelModal';
 
 const { Title } = Typography;
 
@@ -15,7 +16,12 @@ const ModelStudio = ({ prevProblem }) => {
   const {
     models,
     datasets,
-    availableMetrics,
+    //availableMetrics,
+    metricCategories,
+    isEditVisible,
+    setIsEditVisible,
+    saveEditedModel,
+    editingModel,
     togglePublic,
     deleteModel,
     editModel,
@@ -61,7 +67,7 @@ const ModelStudio = ({ prevProblem }) => {
               model={item}
               onTogglePublic={togglePublic}
               onDelete={deleteModel}
-              onEdit={editModel}
+              onEdit={editModel}  
             />
           </List.Item>
         )}
@@ -85,17 +91,27 @@ const ModelStudio = ({ prevProblem }) => {
         onUpload={uploadModel}
         problem={prevProblem}
         datasets={datasets} // ✅ 将数据集列表传入以供选择
-        metricOptions={availableMetrics}
+        //metricOptions={availableMetrics}
+        metricCategories={metricCategories}
+        
       />
-
 
       <UploadDatasetModal
         visible={isUploadDatasetVisible}
         onCancel={() => setIsUploadDatasetVisible(false)}
         onUpload={uploadDataset}
       />
+      <EditModelModal
+      visible={isEditVisible}
+      onCancel={() => setIsEditVisible(false)}
+      onSave={saveEditedModel}
+      model={editingModel}
+      datasets={datasets}
+    />
     </div>
+    
   );
+
 };
 
 export default ModelStudio;
@@ -184,63 +200,3 @@ export default ModelStudio;
 
 */
 
-
-/*import React, { useState } from 'react';
-import { Card, List, Switch, Button, Typography, Space, Tag } from 'antd';
-import { UploadOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
-import modelsMock from '../../mock/modelsMock';
-
-const { Title, Text } = Typography;
-
-const ModelStudio = () => {
-  const [models, setModels] = useState(modelsMock);
-
-  const togglePublic = (id) => {
-    const updated = models.map((m) =>
-      m.id === id ? { ...m, isPublic: !m.isPublic } : m
-    );
-    setModels(updated);
-  };
-
-  return (
-    <div style={{ padding: '16px' }}>
-      <Title level={3}>🔧 我的模型</Title>
-      <Button type="primary" icon={<UploadOutlined />} style={{ marginBottom: 16 }}>
-        上传新模型
-      </Button>
-
-      <List
-        grid={{ gutter: 16, column: 2 }}
-        dataSource={models}
-        renderItem={(item) => (
-          <List.Item>
-            <Card
-              title={item.name}
-              extra={<Tag color="blue">{item.task}</Tag>}
-              actions={[
-                <Switch
-                  checked={item.isPublic}
-                  onChange={() => togglePublic(item.id)}
-                  checkedChildren="公开"
-                  unCheckedChildren="私有"
-                />,
-                <EditOutlined key="edit" />,
-                <DeleteOutlined key="delete" />,
-              ]}
-            >
-              <Space direction="vertical">
-                <Text type="secondary">创建时间: {item.createdAt}</Text>
-                <Text>Accuracy: {item.metrics.accuracy}</Text>
-                <Text>F1 Score: {item.metrics.f1}</Text>
-              </Space>
-            </Card>
-          </List.Item>
-        )}
-      />
-    </div>
-  );
-};
-
-export default ModelStudio;
-
-*/

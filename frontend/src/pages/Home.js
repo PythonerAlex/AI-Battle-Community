@@ -88,7 +88,7 @@ function Home() {
               <div
                 style={{
                   // backgroundColor: 'rgba(220, 240, 255, 0.85)',  // 淡蓝，略透明
-                  backgroundColor: '#32bdefff', // 深蓝（Tailwind Indigo-800 或 SDG 蓝）
+                  backgroundColor: '#0a79bfff', // 深蓝（Tailwind Indigo-800 或 SDG 蓝）
                   padding: '16px',
                   borderRadius: '10px',
                   width: '100%',
@@ -208,6 +208,7 @@ function Home() {
               icon: <UserOutlined style={{ fontSize: 32, color: '#eb2f96' }} />,
               title: 'Citizen Contributors',
               desc: 'Vote, propose, and shape criteria — no coding required!',
+              photo: '/team/EmaSun.jpg',
             },
           ].map((item, idx) => (
             <Col xs={24} md={6} key={idx}>
@@ -232,33 +233,44 @@ function Home() {
       </div>
 
       {/* Testimonials */}
+
       <div style={{ marginTop: 20 }}>
         <Title level={2}>What People Say</Title>
         <Row gutter={[24, 24]} align="stretch">
           {[
             {
-              name: 'Jenny, Grade 10',
+              name: 'Jenny, Grade 11',
               feedback: 'I never thought I could do AI until I joined ABC!',
+              photo: '/people/jenny.jpg', // ← Add your image path
             },
             {
               name: 'Mr. Lopez, GreenFuture',
               feedback: 'Our NGO used a winning model to predict wildfires.',
+              photo: '/people/lopez.jpg',
             },
             {
-              name: 'Rajiv, Age 14',
+              name: 'Rajiv, Age 16',
               feedback: 'The battles made machine learning fun and exciting!',
+              photo: '/people/rajiv.jpg',
             },
           ].map((item, idx) => (
             <Col xs={24} md={8} key={idx}>
               <Card
                 bordered
+                hoverable
                 style={{
                   height: '100%',
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'space-between',
+                  textAlign: 'center',
                 }}
               >
+                <Avatar
+                  size={120}
+                  src={item.photo}       // ✅ Show person’s photo
+                  style={{ margin: '0 auto', marginBottom: 10 }}
+                />
                 <Paragraph style={{ flexGrow: 1 }}>"{item.feedback}"</Paragraph>
                 <Text type="secondary">– {item.name}</Text>
               </Card>
@@ -266,6 +278,7 @@ function Home() {
           ))}
         </Row>
       </div>
+
 
       {/* Team Introduction */}
       <div style={{ marginTop: 20 }}>
@@ -276,16 +289,19 @@ function Home() {
               name: 'Zijian (Alex) Jin',
               role: 'CEO & Chief Architect',
               desc: 'Co-founder of SATDuel, USACO Silver, system architect & full-stack developer.',
+              photo: '/team/AlexJin.jpg',
             },
             {
               name: 'Xuyang (Kenny) Wang',
               role: 'CTO',
               desc: 'Mecha Mayhem Semi-Finalist, coding club founder, robotics and CS expert.',
+              photo: '/team/KennyWang.jpg',
             },
             {
               name: 'Anyue (Ema) Sun',
               role: 'CMO & UI/UX',
               desc: 'Youth Voice founder, UN Youth Speaker nominee, UI designer & marketer.',
+              photo: '/team/EmaSun.jpg',
             },
           ].map((member, idx) => (
             <Col xs={24} md={8} key={idx}>
@@ -300,7 +316,12 @@ function Home() {
                   textAlign: 'center',
                 }}
               >
-                <Avatar size={64} icon={<UserOutlined />} style={{ margin: '0 auto' }} />
+                {/*<Avatar size={64} icon={<UserOutlined />} style={{ margin: '0 auto' }} />*/}
+                <Avatar
+                  size={120}
+                  src={member.photo}   // ✅ use member photo
+                  style={{ margin: '0 auto' }}
+                />
                 <Title level={4} style={{ marginTop: 10 }}>{member.name}</Title>
                 <Text type="secondary">{member.role}</Text>
                 <Paragraph style={{ marginTop: 10, flexGrow: 1 }}>{member.desc}</Paragraph>

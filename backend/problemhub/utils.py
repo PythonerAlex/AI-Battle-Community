@@ -18,7 +18,7 @@ def generate_prompt_from_proposal(data):
 【评估期望】{data.get("metricHint")}
 
 请输出以下 JSON 格式：
-{{
+{{  
   "clarity": int,
   "impact": int,
   "evaluability": int,

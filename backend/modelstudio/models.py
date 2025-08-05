@@ -38,13 +38,62 @@ class MLModel(models.Model):
 
 # modelstudio/models.py（继续追加）
 
-class ModelMetric(models.Model):
+'''class ModelMetric(models.Model):
     model = models.ForeignKey(MLModel, on_delete=models.CASCADE, related_name='metrics')
     name = models.CharField(max_length=100)  # 指标名，如 'accuracy', 'f1'
     value = models.FloatField()
 
+    class Meta:
+        unique_together = ('ml_model', 'metric')  # Each model can have one value per metric
     def __str__(self):
-        return f'{self.name}: {self.value:.4f}'
+        #return f'{self.name}: {self.value:.4f}'
+        f'{self.ml_model.name} - {self.metric.name}: {self.value:.4f}'
+'''
 
 
 
+
+class MetricCategory(models.Model):
+    """High-level category for machine learning metrics."""
+    name = models.CharField(max_length=100, unique=True)  # e.g., 'Supervised Learning'
+    description = models.TextField(blank=True)
+
+    class Meta:
+        verbose_name = "Metric Category"
+        verbose_name_plural = "Metric Categories"
+
+    def __str__(self):
+        return self.name
+
+
+class MetricDefinition(models.Model):
+    """Definition of an evaluation metric."""
+    category = models.ForeignKey(
+        MetricCategory, on_delete=models.CASCADE, related_name="metrics"
+    )
+    name = models.CharField(max_length=100, unique=True)  # e.g., 'accuracy', 'f1'
+    display_name = models.CharField(max_length=100, blank=True)  # e.g., 'Accuracy (Top-1)'
+    description = models.TextField(blank=True)  # Explain metric usage
+    formula = models.TextField(blank=True)      # Optional: store LaTeX or formula
+    higher_is_better = models.BooleanField(default=True)  # e.g., loss -> False
+
+    class Meta:
+        verbose_name = "Metric Definition"
+        verbose_name_plural = "Metric Definitions"
+        ordering = ["category", "name"]
+
+    def __str__(self):
+        return f"{self.name} ({self.category.name})"
+
+class ModelMetric(models.Model):
+    ml_model = models.ForeignKey(MLModel, on_delete=models.CASCADE, related_name='metrics')
+    metric = models.ForeignKey(MetricDefinition, on_delete=models.CASCADE, related_name='model_metrics')
+    value = models.FloatField()
+
+    class Meta:
+        unique_together = ('ml_model', 'metric')
+    def __str__(self):
+        #return f'{self.name}: {self.value:.4f}'
+        model_name = self.ml_model.name if self.ml_model else "UnknownModel"
+        metric_name = self.metric.name if self.metric else "UnknownMetric"
+        return f'{model_name} - {metric_name}: {self.value:.4f}'

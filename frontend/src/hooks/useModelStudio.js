@@ -7,10 +7,15 @@ import { API_BASE_URL } from '../config/wsConfig';
 export default function useModelStudio() {
     const [models, setModels] = useState([]);
     const [datasets, setDatasets] = useState([]);
+
+    const [editingModel, setEditingModel] = useState(null); // 当前正在编辑的模型
+    const [isEditVisible, setIsEditVisible] = useState(false);
+
     const token = localStorage.getItem('access_token');
 
     const headers = {
         Authorization: `Bearer ${token}`,
+
     };
 
     // ✅ 获取模型列表
@@ -36,10 +41,10 @@ export default function useModelStudio() {
         if (newModel.datasetId) {
             formData.append('dataset_id', newModel.datasetId);
         }
-          // ✅ 添加 metrics 字段，作为 JSON 字符串
-  if (newModel.metrics && Object.keys(newModel.metrics).length > 0) {
-    formData.append('metrics', JSON.stringify(newModel.metrics));
-  }
+        // ✅ 添加 metrics 字段，作为 JSON 字符串
+        if (newModel.metrics && Object.keys(newModel.metrics).length > 0) {
+            formData.append('metrics', JSON.stringify(newModel.metrics));
+        }
 
         try {
             const res = await fetch(`${API_BASE_URL}/api/modelstudio/upload/`, {
@@ -50,6 +55,7 @@ export default function useModelStudio() {
 
             if (!res.ok) throw new Error('Upload failed');
             const data = await res.json();
+
             setModels((prev) => [data, ...prev]);
             message.success('模型上传成功');
         } catch (err) {
@@ -101,26 +107,73 @@ export default function useModelStudio() {
         }
     };
     const editModel = (id) => {
-        console.log('TODO: 编辑模型:', id);
+        const model = models.find((m) => m.id === id);
+        if (!model) return;
+        setEditingModel(model);
+        setIsEditVisible(true);
     };
 
-    const [availableMetrics, setAvailableMetrics] = useState([]);
-    const fetchAvailableMetrics = async () => {
+    const saveEditedModel = async (updatedModel) => {
         try {
-            const res = await fetch(`${API_BASE_URL}/api/modelstudio/available-metrics/`, {
-                method: 'GET',
-                headers,
-            }
-            );
-            if (!res.ok) throw new Error('Failed to fetch metrics');
+            const res = await fetch(`${API_BASE_URL}/api/modelstudio/mine/${updatedModel.id}/`, {
+                method: 'PATCH',
+                headers: {
+                    ...headers,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updatedModel),
+            });
+
+            if (!res.ok) throw new Error('Update failed');
             const data = await res.json();
-            setAvailableMetrics(data);
+
+            // 更新前端 state
+            setModels((prev) =>
+                prev.map((m) => (m.id === data.id ? data : m))
+            );
+
+            message.success('模型更新成功');
+            setIsEditVisible(false);
+            setEditingModel(null);
         } catch (err) {
-            console.error('Error fetching metrics:', err);
-            message.error('无法获取可用评估指标');
+            console.error(err);
+            message.error('模型更新失败');
         }
     };
 
+
+    /* const [availableMetrics, setAvailableMetrics] = useState([]);
+     const fetchAvailableMetrics = async () => {
+         try {
+             const res = await fetch(`${API_BASE_URL}/api/modelstudio/available-metrics/`, {
+                 method: 'GET',
+                 headers,
+             }
+             );
+             if (!res.ok) throw new Error('Failed to fetch metrics');
+             const data = await res.json();
+             setAvailableMetrics(data);
+         } catch (err) {
+             console.error('Error fetching metrics:', err);
+             message.error('无法获取可用评估指标');
+         }
+     };*/
+    const [metricCategories, setMetricCategories] = useState([]);
+
+    const fetchMetricCategories = async () => {
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/modelstudio/metric-categories/`, {
+                method: 'GET',
+                headers,
+            });
+            if (!res.ok) throw new Error('Failed to fetch metric categories');
+            const data = await res.json();
+            setMetricCategories(data); // 保存完整分类+metrics
+        } catch (err) {
+            console.error('Error fetching metric categories:', err);
+            message.error('无法获取指标分类');
+        }
+    };
 
     // ---------- 数据集 ----------
     const fetchDatasets = async () => {
@@ -207,17 +260,23 @@ export default function useModelStudio() {
     useEffect(() => {
         fetchModels();
         fetchDatasets();
-        fetchAvailableMetrics();
+        //fetchAvailableMetrics();
+        fetchMetricCategories();
     }, []);
 
     return {
         models,
         datasets,
-        availableMetrics,
+        //availableMetrics,
+        metricCategories,
+        editingModel,
+        isEditVisible,
+        setIsEditVisible,
         togglePublic,
         deleteModel,
         uploadModel,
         editModel,
+        saveEditedModel,
         fetchModels,
         fetchDatasets,
         uploadDataset,
