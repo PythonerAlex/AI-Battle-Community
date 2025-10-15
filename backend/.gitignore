@@ -1,5 +1,6 @@
 # Django 项目基本忽略规则
 *.pyc
+00*.py
 __pycache__/
 db.sqlite3
 db.sqlite3-journal
