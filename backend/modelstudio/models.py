@@ -97,3 +97,24 @@ class ModelMetric(models.Model):
         model_name = self.ml_model.name if self.ml_model else "UnknownModel"
         metric_name = self.metric.name if self.metric else "UnknownMetric"
         return f'{model_name} - {metric_name}: {self.value:.4f}'
+    
+
+    # modelstudio/models.py
+from django.contrib.auth import get_user_model
+User = get_user_model()
+
+class ModelComment(models.Model):
+    ml_model = models.ForeignKey(
+        MLModel, on_delete=models.CASCADE, related_name='comments'
+    )
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='model_comments'
+    )
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at']  # 时间顺序
+
+    def __str__(self):
+        return f'{self.user.username} -> {self.ml_model.name}'

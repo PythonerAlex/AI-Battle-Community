@@ -71,8 +71,8 @@ const UploadModelModal = ({ visible, onCancel, onUpload, problem, datasets, metr
             destroyOnClose
         >
             <Form layout="vertical" form={form} onFinish={handleFinish}>
-                <Form.Item label="当前任务">
-                    <Typography.Text strong>{problem?.title || '无'}</Typography.Text>
+                <Form.Item label="Current task">
+                    <Typography.Text strong>{problem?.title || 'None'}</Typography.Text>
                 </Form.Item>
 
                 <Form.Item
@@ -146,8 +146,8 @@ const UploadModelModal = ({ visible, onCancel, onUpload, problem, datasets, metr
                     </Form.Item>
                 ))}
 
-                <Form.Item name="isPublic" label="是否公开" valuePropName="checked">
-                    <Switch checkedChildren="公开" unCheckedChildren="私有" />
+                <Form.Item name="isPublic" label="Publicly visible" valuePropName="checked">
+                    <Switch checkedChildren="Public" unCheckedChildren="Private" />
                 </Form.Item>
             </Form>
         </Modal>

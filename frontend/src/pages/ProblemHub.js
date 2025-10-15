@@ -69,14 +69,14 @@ function ProblemHub() {
       if (current) {
         const diff = dayjs(current.end_time).diff(now);
         if (diff <= 0) {
-          setTimeLeft('⏳ 即将结束...');
+          setTimeLeft('⏳ Ending soon...');
         } else {
           const dur = dayjs.duration(diff);
           const days = Math.floor(dur.asDays());
           const hours = dur.hours();
           const minutes = dur.minutes();
           const seconds = dur.seconds();
-          setTimeLeft(`${days}天 ${hours}小时 ${minutes}分 ${seconds}秒`);
+          setTimeLeft(`${days}d ${hours}h ${minutes}m ${seconds}s`);
         }
       } else {
         setTimeLeft('');

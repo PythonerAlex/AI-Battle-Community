@@ -8,8 +8,11 @@ import AppHeader from './components/Header';
 import Home from './pages/Home';
 import ProblemHub from './pages/ProblemHub';
 import ModelStudioPage from './pages/ModelStudioPage';
-import BattleCenter from './pages/BattleCenter';
-import Forum from './pages/Forum';
+//import BattleCenter from './pages/BattleCenter';
+import BattleCenterMock from './pages/BattleCenterMock';
+//import BattleCenterGPT from './pages/BattleCenterGPT';
+//import Forum from './pages/Forum';
+import DeploymentShowCase from './pages/DeploymentShowCase';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import RoomPage from './pages/RoomPage';
@@ -37,8 +40,10 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/problem-hub" element={<ProblemHub />} />
                 <Route path="/model-studio" element={<ModelStudioPage />} />
-                <Route path="/battle" element={<BattleCenter />} />
-                <Route path="/forum" element={<Forum />} />
+                {/*<Route path="/battle" element={<BattleCenter />} />*/}
+                <Route path="/battle" element={<BattleCenterMock />} />
+                {/*<Route path="/forum" element={<Forum />} />*/}
+                <Route path="/forum" element={<DeploymentShowCase />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/room/:roomId" element={<RoomPage />} />

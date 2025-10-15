@@ -15,16 +15,16 @@ class Cycle(models.Model):
         #now = timezone.now()
 
         # 2. 新建逻辑
-        if self._state.adding:
-            latest = (
-                Cycle.objects
-                .order_by('-end_time')
-                .first()
-            )
-            if latest and self.start_time <= latest.end_time:
-                raise ValidationError(
-                    f'新建周期的开始时间必须晚于当前最晚周期结束时间：{latest.end_time.isoformat()}'
-                )
+        #if self._state.adding:
+        #    latest = (
+        #        Cycle.objects
+        #        .order_by('-end_time')
+        #       .first()
+        #   )
+        #    if latest and self.start_time <= latest.end_time:
+        #        raise ValidationError(
+        #            f'新建周期的开始时间必须晚于当前最晚周期结束时间：{latest.end_time.isoformat()}'
+        #        )
             return   # 新建就到此为止
 
         # 3. 编辑逻辑：仅当周期仍未结束

@@ -34,11 +34,11 @@ function AppHeader() {
   const handleUserMenuClick = ({ key }) => {
     if (key === 'logout') {
       logout();
-      message.success('已退出登录', 2);
+      message.success('Logged out successfully', 2);
       navigate('/');
       // window.location.reload(); // 可选，如果需要彻底清状态
     } else {
-      message.info(`点击了菜单项：${key}`);
+      message.info(`Clicked menu item: ${key}`);
     }
   };
 

@@ -351,3 +351,97 @@ class ToggleDatasetPublicView(APIView):
         dataset.is_public = not dataset.is_public
         dataset.save()
         return Response({'is_public': dataset.is_public}, status=status.HTTP_200_OK)
+
+
+from rest_framework import generics, permissions
+from rest_framework.pagination import PageNumberPagination
+from django.db.models import Q
+
+from .serializers import ModelGallerySerializer
+
+class GalleryPagination(PageNumberPagination):
+    page_size = 12
+    page_size_query_param = 'page_size'
+
+class ModelGalleryView(generics.ListAPIView):
+    serializer_class = ModelGallerySerializer
+    permission_classes = [permissions.AllowAny]
+    pagination_class = GalleryPagination
+
+    def get_queryset(self):
+        problem_id = self.kwargs['problem_id']
+        q = self.request.query_params.get('q', '').strip()
+        owner_filter = self.request.query_params.get('owner', '')
+
+        qs = MLModel.objects.filter(
+            problem_id=problem_id,
+            is_public=True
+        ).select_related('owner', 'dataset') \
+         .prefetch_related('metrics', 'metrics__metric')
+
+        if q:
+            qs = qs.filter(
+                Q(name__icontains=q) |
+                Q(owner__username__icontains=q) |
+                Q(dataset__name__icontains=q)
+            )
+
+        if owner_filter == 'me' and self.request.user.is_authenticated:
+            qs = qs.filter(owner=self.request.user)
+
+        return qs.order_by('-created_at')
+
+
+
+from .models import ModelComment
+from .serializers import ModelCommentSerializer
+
+class ModelCommentListCreateView(generics.ListCreateAPIView):
+    serializer_class = ModelCommentSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_queryset(self):
+        model_id = self.kwargs['model_id']
+        return ModelComment.objects.filter(
+            ml_model_id=model_id
+        ).select_related('user')
+
+    def perform_create(self, serializer):
+        ml_model = MLModel.objects.get(id=self.kwargs['model_id'])
+        serializer.save(user=self.request.user, ml_model=ml_model)
+
+class ModelCommentDeleteView(generics.DestroyAPIView):
+    queryset = ModelComment.objects.all()
+    serializer_class = ModelCommentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request, *args, **kwargs):
+        comment = self.get_object()
+        if comment.user != request.user and comment.ml_model.owner != request.user:
+            return Response({'detail': '无权限删除此评论'}, status=status.HTTP_403_FORBIDDEN)
+        return super().delete(request, *args, **kwargs)
+
+class PublishModelView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        model = get_object_or_404(MLModel, pk=pk, owner=request.user)
+
+        # 取消该用户在同一问题下的已发布模型
+        MLModel.objects.filter(
+            owner=request.user,
+            problem=model.problem,
+            is_public=True
+        ).exclude(pk=model.pk).update(is_public=False)
+
+        # 发布当前模型
+        model.is_public = True
+        model.save()
+
+        # 关联数据集也设为公开（如果存在）
+        if model.dataset and not model.dataset.is_public:
+            model.dataset.is_public = True
+            model.dataset.save()
+
+        serializer = MLModelSerializer(model)
+        return Response(serializer.data)

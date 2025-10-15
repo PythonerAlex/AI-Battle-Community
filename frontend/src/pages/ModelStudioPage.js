@@ -3,7 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import { Tabs, Typography, Card, Space } from 'antd';
 import ModelStudio from '../components/ModelStudio/ModelStudio';
-import ModelGallery from '../components/ModelStudio/ModelGallery';
+//import ModelGallery from '../components/ModelStudio/ModelGallery';
+import ModelGallery from '../components/ModelGallery/ModelGallery';
 import DatasetHub from '../components/ModelStudio/DatasetHub';
 import TestSetSelector from '../components/ModelStudio/TestSetSelector';
 import InsightsFeed from '../components/ModelStudio/InsightsFeed';
@@ -67,19 +68,19 @@ const ModelStudioPage = () => {
         <Card style={{ marginBottom: 24 }} bordered>
           <Space direction="vertical">
             <Text>
-              <strong>Current Cycle：</strong> {prevCycle?.title || '无'}
+              <strong>Current Cycle：</strong> {prevCycle?.title || 'None'}
             </Text>
             <Text>
               <strong>Question call for models（Prev.cycle winner）：</strong>{' '}
-              {prevProblem?.title || '暂无'}
-              {votes !== null && `（${votes}票）`}
+              {prevProblem?.title || 'Not available'}
+              {votes !== null && ` (${votes} votes)`}
             </Text>
             <Text>
               <strong>Count Down：</strong>{' '}
               {countdown ? (
                 <Text type="danger">{countdown}</Text>
               ) : (
-                <Text type="secondary">等待中</Text>
+                <Text type="secondary">Waiting...</Text>
               )}
             </Text>
           </Space>
@@ -91,16 +92,23 @@ const ModelStudioPage = () => {
           {!isWinnerLoading && prevProblem ? (
             <ModelStudio prevProblem={prevProblem} />
           ) : (
-            <Typography.Text type="secondary">加载上一轮问题中...</Typography.Text>
+            <Typography.Text type="secondary">Loading previous round problem...</Typography.Text>
           )}
         </TabPane>
 
-        <TabPane tab="🌍 Models Display" key="gallery">
+        {/*<TabPane tab="🌍 Models Display" key="gallery">
           <ModelGallery />
+        </TabPane>*/}
+        <TabPane tab="🌍 Models Display" key="gallery">
+          {!isWinnerLoading && prevProblem ? (
+            <ModelGallery problemId={prevProblem.id} />
+          ) : (
+            <Typography.Text type="secondary">Loading previous round problem...</Typography.Text>
+          )}
         </TabPane>
-        <TabPane tab="📂 Dataset display" key="datasets">
+        {/*<TabPane tab="📂 Dataset display" key="datasets">
           <DatasetHub />
-        </TabPane>
+        </TabPane>*/}
         <TabPane tab="🗳 Vote Testset" key="testsets">
           <TestSetSelector />
         </TabPane>

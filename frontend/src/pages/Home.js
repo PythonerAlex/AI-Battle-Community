@@ -88,7 +88,7 @@ function Home() {
               <div
                 style={{
                   // backgroundColor: 'rgba(220, 240, 255, 0.85)',  // 淡蓝，略透明
-                  backgroundColor: '#0a79bfff', // 深蓝（Tailwind Indigo-800 或 SDG 蓝）
+                  backgroundColor: '#5eb6edff', // 深蓝（Tailwind Indigo-800 或 SDG 蓝）
                   padding: '16px',
                   borderRadius: '10px',
                   width: '100%',
@@ -153,7 +153,7 @@ function Home() {
             },
             {
               title: '2. Build Models',
-              description: 'Use Model Studio to develop solutions with shared tools.',
+              description: 'Use Model Studio to upload solutions with shared tools.',
             },
             {
               title: '3. Compete in Battles',
@@ -161,7 +161,7 @@ function Home() {
             },
             {
               title: '4. Real-World Impact',
-              description: 'Top models get deployed and recognized.',
+              description: 'Application of top models get deployed and recognized.',
             },
           ].map((step, idx) => (
             <Col xs={24} md={6} key={idx}>

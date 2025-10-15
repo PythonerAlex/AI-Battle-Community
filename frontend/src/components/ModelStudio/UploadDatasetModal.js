@@ -13,7 +13,7 @@ const UploadDatasetModal = ({ visible, onCancel, onUpload }) => {
     try {
       const values = await form.validateFields();
       if (!fileObj) {
-        message.warning('请上传数据集文件');
+        message.warning('Please upload a dataset file');
         return;
       }
 
@@ -27,7 +27,7 @@ const UploadDatasetModal = ({ visible, onCancel, onUpload }) => {
       setFileObj(null);
       onCancel();
     } catch (err) {
-      console.log('验证失败:', err);
+      console.log('Validation failed:', err);
     }
   };
 
@@ -43,43 +43,43 @@ const UploadDatasetModal = ({ visible, onCancel, onUpload }) => {
   return (
     <Modal
       open={visible}
-      title="上传数据集"
+      title="Upload Dataset"
       onCancel={() => {
         form.resetFields();
         setFileObj(null);
         onCancel();
       }}
       onOk={handleOk}
-      okText="上传"
+      okText="Upload"
     >
       <Form form={form} layout="vertical">
         <Form.Item
           name="name"
-          label="数据集名称"
-          rules={[{ required: true, message: '请输入数据集名称' }]}
+          label="Dataset name"
+          rules={[{ required: true, message: 'Please enter the dataset name' }]}
         >
-          <Input placeholder="如 MNIST Test Set" />
+          <Input placeholder="e.g. MNIST Test Set" />
         </Form.Item>
 
-        <Form.Item name="description" label="数据集描述">
-          <Input.TextArea rows={3} placeholder="可选：简单描述该数据集" />
+        <Form.Item name="description" label="Dataset description">
+          <Input.TextArea rows={3} placeholder="Optional: briefly describe this dataset" />
         </Form.Item>
 
         <Form.Item
-          label="上传文件"
+          label="Upload file"
           required
-          tooltip="请上传 CSV、ZIP、TXT 等格式的文件"
+          tooltip="Please upload files in CSV, ZIP, TXT, etc. formats"
         >
           <Dragger {...uploadProps}>
             <p className="ant-upload-drag-icon">
               <InboxOutlined />
             </p>
-            <p className="ant-upload-text">点击或拖拽文件上传</p>
+            <p className="ant-upload-text">Click or drag file to upload</p>
           </Dragger>
         </Form.Item>
 
-        <Form.Item name="isPublic" label="是否公开" valuePropName="checked">
-          <Switch checkedChildren="公开" unCheckedChildren="私有" defaultChecked={false} />
+        <Form.Item name="isPublic" label="Publicly visible" valuePropName="checked">
+          <Switch checkedChildren="Public" unCheckedChildren="Private" defaultChecked={false} />
         </Form.Item>
       </Form>
     </Modal>

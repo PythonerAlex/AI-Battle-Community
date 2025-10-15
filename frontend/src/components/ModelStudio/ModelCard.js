@@ -19,54 +19,70 @@ const ModelCard = ({ model, onTogglePublic, onDelete, onEdit }) => {
     } = model;
 
 
-const problemTitle = problem_title 
+    const problemTitle = problem_title
 
 
-   /* // ✅ 渲染 Metrics
+    /* // ✅ 渲染 Metrics
+     const renderMetrics = () => {
+         // 如果 metrics 是数组（来自后端 ModelMetric）
+         if (Array.isArray(metrics)) {
+             return metrics.length > 0 ? (
+                 metrics.map((m) => (
+                     <Text key={m.id || `${m.metric_name}-${m.value}`}>
+                         {m.metric_name || m.name}: {m.value}
+                     </Text>
+                 ))
+             ) : (
+                 <Text type="secondary">No metrics</Text>
+             );
+         }
+ 
+         // 如果 metrics 是对象（前端临时状态）
+         const entries = Object.entries(metrics || {});
+         return entries.length > 0 ? (
+             entries.map(([metricName, value]) => (
+                 <Text key={metricName}>
+                     {metricName}: {value}
+                 </Text>
+             ))
+         ) : (
+             <Text type="secondary">No metrics</Text>
+         );
+     };
+ */
+    // ✅ 渲染 Metrics（后端统一返回数组）
     const renderMetrics = () => {
-        // 如果 metrics 是数组（来自后端 ModelMetric）
-        if (Array.isArray(metrics)) {
-            return metrics.length > 0 ? (
-                metrics.map((m) => (
-                    <Text key={m.id || `${m.metric_name}-${m.value}`}>
-                        {m.metric_name || m.name}: {m.value}
-                    </Text>
-                ))
-            ) : (
-                <Text type="secondary">No metrics</Text>
-            );
+        if (!metrics || metrics.length === 0) {
+            return <Text type="secondary">No metrics</Text>;
         }
 
-        // 如果 metrics 是对象（前端临时状态）
-        const entries = Object.entries(metrics || {});
-        return entries.length > 0 ? (
-            entries.map(([metricName, value]) => (
-                <Text key={metricName}>
-                    {metricName}: {value}
-                </Text>
-            ))
-        ) : (
-            <Text type="secondary">No metrics</Text>
-        );
+        return metrics.map((m, idx) => (
+            <Text key={idx}>
+                {m.metric_name}: {m.value}
+            </Text>
+        ));
     };
-*/
-// ✅ 渲染 Metrics（后端统一返回数组）
-const renderMetrics = () => {
-    if (!metrics || metrics.length === 0) {
-        return <Text type="secondary">No metrics</Text>;
-    }
-
-    return metrics.map((m, idx) => (
-        <Text key={idx}>
-            {m.metric_name}: {m.value}
-        </Text>
-    ));
-};
 
     return (
         <Card
-            title={name}
-            extra={<Tag color="blue">{problemTitle}</Tag>}
+  title={
+    <div style={{ display: 'inline-flex', alignItems: 'flex-start', gap: 8 }}>
+      {/* 标题 */}
+      <span style={{ wordBreak: 'break-word' }}>{name}</span>
+
+      {/* 紧贴标题的 Tag */}
+      <Tag
+        color="blue"
+        style={{
+          whiteSpace: 'normal',
+          height: 'auto',
+          maxWidth: 'none',   // 不再人为限制宽度
+        }}
+      >
+        {problemTitle}
+      </Tag>
+    </div>
+  }
             actions={[
                 <Switch
                     key="switch"

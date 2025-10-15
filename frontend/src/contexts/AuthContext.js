@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-
+import { WS_BASE_URL, API_BASE_URL } from '../config/wsConfig';
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
@@ -10,9 +10,8 @@ export const AuthProvider = ({ children }) => {
   const getCurrentUser = async () => {
     const token = localStorage.getItem('access_token');
     if (!token) return;
-
     try {
-      const res = await fetch('/api/user_info/', {
+      const res = await fetch(`${API_BASE_URL}/api/user_info/`, {
         headers: {
           Authorization: `Bearer ${token}`
         }

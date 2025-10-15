@@ -1,5 +1,38 @@
+
 # utils.py
 def generate_prompt_from_proposal(data):
+    return f"""
+Below is a user-submitted AI problem proposal. Please score it on a 0–10 scale across the following five dimensions and compute the average. If the average is below 6.0, reject the proposal and state the most critical improvement suggestion.
+
+Scoring dimensions:
+1. Clarity – Is the problem clearly stated and its objective unambiguous?
+2. Impact – Does it have real-world significance and align with the SDGs?
+3. Evaluability – Can model performance be quantitatively assessed?
+4. Data Feasibility – Are data available or realistically obtainable?
+5. Non-Functional Validity – Are performance/fairness requirements reasonable?
+
+Proposal:
+[Title] {data.get("title")}
+[Background & Significance] {data.get("background")}
+[Goal] {data.get("goal")}
+[Non-Functional Requirements] {data.get("nonFunctional", "None")}
+[Data Sources] {data.get("dataSources", "None")}
+[Evaluation Expectation] {data.get("metricHint")}
+
+Please return the following JSON:
+{{
+  "clarity": int,
+  "impact": int,
+  "evaluability": int,
+  "data_feasibility": int,
+  "nonfunctional_validity": int,
+  "average_score": float,
+  "decision": "accept/reject",
+  "reasons": ["...brief reasons (max 2)..."]
+}}
+"""
+
+'''def generate_prompt_from_proposal(data):
     return f"""
 以下是用户提交的AI问题提案，请你从以下5个维度打分（0-10），并给出平均分。如果总分低于60，拒绝，并指出最主要的改进建议。评分维度为：
 
@@ -29,3 +62,4 @@ def generate_prompt_from_proposal(data):
   "reasons": ["...简短理由（最多2条）..."]
 }}
 """
+'''

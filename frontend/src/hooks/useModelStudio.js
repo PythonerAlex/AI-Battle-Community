@@ -26,7 +26,7 @@ export default function useModelStudio() {
             setModels(data);
         } catch (err) {
             console.error('Failed to fetch models:', err);
-            message.error('无法获取模型列表');
+            message.error('Unable to fetch model list');
         }
     };
 
@@ -57,10 +57,10 @@ export default function useModelStudio() {
             const data = await res.json();
 
             setModels((prev) => [data, ...prev]);
-            message.success('模型上传成功');
+            message.success('Model uploaded successfully');
         } catch (err) {
             console.error('Upload error:', err);
-            message.error('上传失败');
+            message.error('Upload failed');
         }
     };
 
@@ -74,14 +74,14 @@ export default function useModelStudio() {
 
             if (res.status === 204) {
                 setModels((prev) => prev.filter((m) => m.id !== id));
-                message.success('模型已删除');
+                message.success('Model deleted');
             } else {
                 const data = await res.json();
-                message.error(data.detail || '删除失败');
+                message.error(data.detail || 'Delete failed');
             }
         } catch (err) {
             console.error('Delete error:', err);
-            message.error('删除模型失败');
+            message.error('Failed to delete model');
         }
     };
 
@@ -99,11 +99,11 @@ export default function useModelStudio() {
                     prev.map((m) => (m.id === id ? { ...m, is_public: data.is_public } : m))
                 );
             } else {
-                message.error('切换失败');
+                message.error('Toggle failed');
             }
         } catch (err) {
             console.error('Toggle error:', err);
-            message.error('切换公开状态失败');
+            message.error('Failed to toggle visibility');
         }
     };
     const editModel = (id) => {
@@ -132,12 +132,12 @@ export default function useModelStudio() {
                 prev.map((m) => (m.id === data.id ? data : m))
             );
 
-            message.success('模型更新成功');
+            message.success('Model updated successfully');
             setIsEditVisible(false);
             setEditingModel(null);
         } catch (err) {
             console.error(err);
-            message.error('模型更新失败');
+            message.error('Failed to update model');
         }
     };
 
@@ -171,7 +171,7 @@ export default function useModelStudio() {
             setMetricCategories(data); // 保存完整分类+metrics
         } catch (err) {
             console.error('Error fetching metric categories:', err);
-            message.error('无法获取指标分类');
+            message.error('Unable to fetch metric categories');
         }
     };
 
@@ -183,7 +183,7 @@ export default function useModelStudio() {
             setDatasets(data);
         } catch (err) {
             console.error('Failed to fetch datasets:', err);
-            message.error('无法获取数据集');
+            message.error('Unable to fetch datasets');
         }
     };
     const uploadDataset = async (newDataset) => {
@@ -206,10 +206,10 @@ export default function useModelStudio() {
             if (!res.ok) throw new Error('Dataset upload failed');
             const data = await res.json();
             setDatasets((prev) => [data, ...prev]);
-            message.success('数据集上传成功');
+            message.success('Dataset uploaded successfully');
         } catch (err) {
-            console.error('上传数据集失败:', err);
-            message.error('数据集上传失败');
+            console.error('Dataset upload failed:', err);
+            message.error('Failed to upload dataset');
         }
     };
 
@@ -223,14 +223,14 @@ export default function useModelStudio() {
 
             if (res.status === 204) {
                 setDatasets((prev) => prev.filter((d) => d.id !== id));
-                message.success('数据集已删除');
+                message.success('Dataset deleted');
             } else {
                 const data = await res.json();
-                message.error(data.detail || '删除失败');
+                message.error(data.detail || 'Delete failed');
             }
         } catch (err) {
-            console.error('删除数据集失败:', err);
-            message.error('删除数据集失败');
+            console.error('Failed to delete dataset:', err);
+            message.error('Failed to delete dataset');
         }
     };
 
@@ -247,11 +247,11 @@ export default function useModelStudio() {
                     prev.map((d) => (d.id === id ? { ...d, is_public: data.is_public } : d))
                 );
             } else {
-                message.error('切换失败');
+                message.error('Toggle failed');
             }
         } catch (err) {
             console.error('Toggle error:', err);
-            message.error('切换公开状态失败');
+            message.error('Failed to toggle visibility');
         }
     };
 

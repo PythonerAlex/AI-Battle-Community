@@ -1,7 +1,7 @@
 # modelstudio/serializers.py
 
 from rest_framework import serializers
-from .models import MLModel, ModelMetric,Dataset,MetricCategory, MetricDefinition
+from .models import MLModel, ModelMetric,Dataset,MetricCategory, MetricDefinition,ModelComment  
 
 #class ModelMetricSerializer(serializers.ModelSerializer):
  #   class Meta:
@@ -77,3 +77,28 @@ class DatasetSerializer(serializers.ModelSerializer):
             'is_public', 
         ]
         read_only_fields = ['owner', 'created_at']
+
+
+class DatasetPublicSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Dataset
+        fields = ['id', 'name', 'file']
+
+class ModelGallerySerializer(serializers.ModelSerializer):
+    owner = serializers.CharField(source='owner.username')
+    dataset = DatasetPublicSerializer()
+    metrics = ModelMetricSerializer(many=True)
+
+    class Meta:
+        model = MLModel
+        fields = [
+            'id', 'name', 'model_file', 'owner', 'created_at',
+            'dataset', 'metrics'
+        ]
+
+class ModelCommentSerializer(serializers.ModelSerializer):
+    user = serializers.CharField(source='user.username', read_only=True)
+
+    class Meta:
+        model = ModelComment
+        fields = ['id', 'user', 'content', 'created_at']
